@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Vitaldent-Agendar citas</title>
+    <!-- Favicon-->
+    <link rel="icon" type="image/x-icon" href="../img/favicon.ico" />
+    <!-- Custom styles for this template-->
+    <link href="../css/sb-admin-2.min.css" rel="stylesheet">
+    <!-- Scripts de bootstrap-->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+    <!--Referencias propias-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.7.0/firebase.js"></script>
+    <script src="../js/acciones/agendar.js"></script>
+</head>
+
+<body id="page-top">
+
+    <!-- Page Wrapper -->
+    <div id="wrapper">
+
+        <!-- Sidebar -->
+        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+
+            <!-- Sidebar - Brand -->
+            <a class="sidebar-brand d-flex align-items-center justify-content-center">
+                <div class="sidebar-brand-icon rotate-n-15">
+                    <i class="fas fa-laugh-wink"></i>
+                </div>
+                <div class="sidebar-brand-text mx-3">
+                    VITALDENT
+                    <div class="sidebar-heading">
+                        TU SONRISA
+                    </div>
+                    <div class="sidebar-heading">
+                        TU IMAGEN
+                    </div>
+                </div>
+            </a>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider">
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                Pacientes
+            </div>
+            <!-- Nav Item - Charts -->
+            <li class="nav-item">
+                <a class="nav-link" href="../pacientes/inicio.html">
+                    <img src="../img/opciones/lista.png" width="30" height="30">
+                    <span>Ver</span></a>
+            </li>
+            <!-- Nav Item - Tables -->
+            <li class="nav-item">
+                <a class="nav-link" href="../pacientes/agregar.html">
+                    <img src="../img/opciones/agregar.png" width="30" height="30">
+                    <span>Agregar</span></a>
+            </li>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider">
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                Doctores
+            </div>
+            <!-- Nav Item - Charts -->
+            <li class="nav-item">
+                <a class="nav-link" href="../doctores/listado.html">
+                    <img src="../img/opciones/listaD.png" width="30" height="30">
+                    <span>Ver</span></a>
+            </li>
+            <!-- Nav Item - Tables -->
+            <li class="nav-item">
+                <a class="nav-link" href="../doctores/agregar.html">
+                    <img src="../img/opciones/agregarD.png" width="30" height="30">
+                    <span>Agregar</span></a>
+            </li>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider">
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                Acciones
+            </div>
+            <!-- Nav Item - Tables -->
+            <li class="nav-item">
+                <a class="nav-link" href="citas.html">
+                    <img src="../img/opciones/cita.png" width="30" height="30">
+                    <span>Citas</span></a>
+            </li>
+            <!-- Nav Item - Tables -->
+            <li class="nav-item">
+                <a class="nav-link" href="especialidades.html">
+                    <img src="../img/opciones/especialidad.png" width="30" height="30">
+                    <span>Especialidades</span></a>
+            </li>
+            <!-- Nav Item - Tables -->
+            <li class="nav-item">
+                <a class="nav-link" href="tratamientos.html">
+                    <img src="../img/opciones/tratamiento.png" width="30" height="30">
+                    <span>Tratamientos</span></a>
+            </li>
+            <!-- Nav Item - Tables -->
+            <li class="nav-item">
+                <a class="nav-link" href="../acciones/reportes.html">
+                    <img src="../img/opciones/reportes.png" width="30" height="30">
+                    <span>Reportes</span></a>
+            </li>
+             <!-- Nav Item - Tables -->
+             <li class="nav-item">
+                <a class="nav-link" href="cumpleaños.html">
+                    <img src="../img/opciones/cumpleaños.png" width="30" height="30">
+                    <span>Cumpleaños</span></a>
+            </li>
+            <!-- Divider -->
+            <hr class="sidebar-divider">
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                @DLC PROGRAMMING
+            </div>
+        </ul>
+        <!-- End of Sidebar -->
+
+        <!-- Content Wrapper -->
+        <div id="content-wrapper" class="d-flex flex-column">
+
+            <!-- Main Content -->
+            <div id="content">
+                <!-- Topbar -->
+                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+
+                    <!-- Topbar Navbar -->
+                    <ul class="navbar-nav ml-auto">
+
+                        <div class="topbar-divider d-none d-sm-block"></div>
+
+                        <!-- Nav Item - User Information -->
+                        <li class="nav-item dropdown no-arrow">
+                            <div class="dropdown show">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <span class="mr-2 d-none d-lg-inline text-gray-600 small" id="usuario"></span>
+                                    <img class="img-profile rounded-circle" src="../img/perfil.png">
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                                    <a class="dropdown-item" id="btnSalir">Salir</a>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </nav>
+                <!-- End of Topbar -->
+                <div id="alerta"></div>
+                <!--Botones para realizar acciones-->
+                <div class="form-group">
+                    <div class="col-sm-10">
+                        <button type="button" id="btnPendientes" class="btn btn-outline-primary">
+                            <img src="../img/opciones/pendientes.png"> Pendientes</button>
+                        <button type="button" id="btnTerminadas" class="btn btn-outline-dark">
+                            <img src="../img/opciones/citasPasadas.png"> Terminadas</button>
+                    </div>
+                </div>
+                <hr>
+                <!--Form para la fecha-->
+                <div class="form-group row">
+                    <label class="col-sm-1 col-form-label">Fecha</label>
+                    <div class="col-sm-5">
+                        <input type="date" id="fecha" class="form-control">
+                    </div>
+                </div>
+                <!-- Agregar -->
+                <div id="agendar"></div>
+                <div id="datosCita"></div>
+                <!--Tabla de citas-->
+                <table class="table table-bordered table-sm">
+                    <thead class="thead-light">
+                        <tr>
+                            <th scope="col">Hora</th>
+                            <th scope="col">Paciente</th>
+                            <th scope="col">Teléfono</th>
+                            <th scope="col">Observación</th>
+                            <th scope="col">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th>8:00</th>
+                            <td><input id="nom22" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="tel22" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="obs22" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td>
+                                <button type="button" class="btnAgendar btn btn-outline-primary btn-sm" id="8_00">
+                                    Agendar
+                                </button>
+                                <button type="button" class="btnEliminar btn btn-outline-danger btn-sm" id="8_00_e"
+                                    disabled>
+                                    Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>8:30</th>
+                            <td><input id="nom23" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="tel23" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="obs23" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td>
+                                <button type="button" class="btnAgendar btn btn-outline-primary btn-sm" id="8_30">
+                                    Agendar
+                                </button>
+                                <button type="button" class="btnEliminar btn btn-outline-danger btn-sm" id="8_30_e"
+                                    disabled>
+                                    Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>9:00</th>
+                            <td><input id="nom1" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="tel1" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="obs1" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td>
+                                <button type="button" class="btnAgendar btn btn-outline-primary btn-sm" id="9_00">
+                                    Agendar
+                                </button>
+                                <button type="button" class="btnEliminar btn btn-outline-danger btn-sm" id="9_00_e"
+                                    disabled>
+                                    Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>9:30</th>
+                            <td><input id="nom2" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="tel2" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="obs2" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td>
+                                <button type="button" class="btnAgendar btn btn-outline-primary btn-sm" id="9_30">
+                                    Agendar
+                                </button>
+                                <button type="button" class="btnEliminar btn btn-outline-danger btn-sm" id="9_30_e"
+                                    disabled>
+                                    Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>10:00</th>
+                            <td><input id="nom3" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="tel3" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="obs3" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td>
+                                <button type="button" class="btnAgendar btn btn-outline-primary btn-sm" id="10_00">
+                                    Agendar
+                                </button>
+                                <button type="button" class="btnEliminar btn btn-outline-danger btn-sm" id="10_00_e"
+                                    disabled>
+                                    Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>10:30</th>
+                            <td><input id="nom4" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="tel4" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="obs4" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td>
+                                <button type="button" class="btnAgendar btn btn-outline-primary btn-sm" id="10_30">
+                                    Agendar
+                                </button>
+                                <button type="button" class="btnEliminar btn btn-outline-danger btn-sm" id="10_30_e"
+                                    disabled>
+                                    Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>11:00</th>
+                            <td><input id="nom5" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="tel5" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="obs5" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td>
+                                <button type="button" class="btnAgendar btn btn-outline-primary btn-sm" id="11_00">
+                                    Agendar
+                                </button>
+                                <button type="button" class="btnEliminar btn btn-outline-danger btn-sm" id="11_00_e"
+                                    disabled>
+                                    Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>11:30</th>
+                            <td><input id="nom6" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="tel6" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="obs6" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td>
+                                <button type="button" class="btnAgendar btn btn-outline-primary btn-sm" id="11_30">
+                                    Agendar
+                                </button>
+                                <button type="button" class="btnEliminar btn btn-outline-danger btn-sm" id="11_30_e"
+                                    disabled>
+                                    Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>12:00</th>
+                            <td><input id="nom7" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="tel7" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="obs7" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td>
+                                <button type="button" class="btnAgendar btn btn-outline-primary btn-sm" id="12_00">
+                                    Agendar
+                                </button>
+                                <button type="button" class="btnEliminar btn btn-outline-danger btn-sm" id="12_00_e"
+                                    disabled>
+                                    Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>12:30</th>
+                            <td><input id="nom8" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="tel8" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="obs8" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td>
+                                <button type="button" class="btnAgendar btn btn-outline-primary btn-sm" id="12_30">
+                                    Agendar
+                                </button>
+                                <button type="button" class="btnEliminar btn btn-outline-danger btn-sm" id="12_30_e"
+                                    disabled>
+                                    Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>15:00</th>
+                            <td><input id="nom9" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="tel9" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="obs9" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td>
+                                <button type="button" class="btnAgendar btn btn-outline-primary btn-sm" id="15_00">
+                                    Agendar
+                                </button>
+                                <button type="button" class="btnEliminar btn btn-outline-danger btn-sm" id="15_00_e"
+                                    disabled>
+                                    Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>15:30</th>
+                            <td><input id="nom10" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="tel10" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="obs10" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td>
+                                <button type="button" class="btnAgendar btn btn-outline-primary btn-sm" id="15_30">
+                                    Agendar
+                                </button>
+                                <button type="button" class="btnEliminar btn btn-outline-danger btn-sm" id="15_30_e"
+                                    disabled>
+                                    Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>16:00</th>
+                            <td><input id="nom11" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="tel11" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="obs11" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td>
+                                <button type="button" class="btnAgendar btn btn-outline-primary btn-sm" id="16_00">
+                                    Agendar
+                                </button>
+                                <button type="button" class="btnEliminar btn btn-outline-danger btn-sm" id="16_00_e"
+                                    disabled>
+                                    Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>16:30</th>
+                            <td><input id="nom12" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="tel12" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="obs12" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td>
+                                <button type="button" class="btnAgendar btn btn-outline-primary btn-sm" id="16_30">
+                                    Agendar
+                                </button>
+                                <button type="button" class="btnEliminar btn btn-outline-danger btn-sm" id="16_30_e"
+                                    disabled>
+                                    Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>17:00</th>
+                            <td><input id="nom13" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="tel13" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="obs13" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td>
+                                <button type="button" class="btnAgendar btn btn-outline-primary btn-sm" id="17_00">
+                                    Agendar
+                                </button>
+                                <button type="button" class="btnEliminar btn btn-outline-danger btn-sm" id="17_00_e"
+                                    disabled>
+                                    Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>17:30</th>
+                            <td><input id="nom14" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="tel14" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="obs14" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td>
+                                <button type="button" class="btnAgendar btn btn-outline-primary btn-sm" id="17_30">
+                                    Agendar
+                                </button>
+                                <button type="button" class="btnEliminar btn btn-outline-danger btn-sm" id="17_30_e"
+                                    disabled>
+                                    Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>18:00</th>
+                            <td><input id="nom15" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="tel15" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="obs15" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td>
+                                <button type="button" class="btnAgendar btn btn-outline-primary btn-sm" id="18_00">
+                                    Agendar
+                                </button>
+                                <button type="button" class="btnEliminar btn btn-outline-danger btn-sm" id="18_00_e"
+                                    disabled>
+                                    Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>18:30</th>
+                            <td><input id="nom16" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="tel16" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="obs16" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td>
+                                <button type="button" class="btnAgendar btn btn-outline-primary btn-sm" id="18_30">
+                                    Agendar
+                                </button>
+                                <button type="button" class="btnEliminar btn btn-outline-danger btn-sm" id="18_30_e"
+                                    disabled>
+                                    Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>19:00</th>
+                            <td><input id="nom17" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="tel17" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="obs17" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td>
+                                <button type="button" class="btnAgendar btn btn-outline-primary btn-sm" id="19_00">
+                                    Agendar
+                                </button>
+                                <button type="button" class="btnEliminar btn btn-outline-danger btn-sm" id="19_00_e"
+                                    disabled>
+                                    Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>19:30</th>
+                            <td><input id="nom18" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="tel18" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="obs18" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td>
+                                <button type="button" class="btnAgendar btn btn-outline-primary btn-sm" id="19_30">
+                                    Agendar
+                                </button>
+                                <button type="button" class="btnEliminar btn btn-outline-danger btn-sm" id="19_30_e"
+                                    disabled>
+                                    Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>20:00</th>
+                            <td><input id="nom19" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="tel19" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="obs19" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td>
+                                <button type="button" class="btnAgendar btn btn-outline-primary btn-sm" id="20_00">
+                                    Agendar
+                                </button>
+                                <button type="button" class="btnEliminar btn btn-outline-danger btn-sm" id="20_00_e"
+                                    disabled>
+                                    Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>20:30</th>
+                            <td><input id="nom20" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="tel20" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="obs20" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td>
+                                <button type="button" class="btnAgendar btn btn-outline-primary btn-sm" id="20_30">
+                                    Agendar
+                                </button>
+                                <button type="button" class="btnEliminar btn btn-outline-danger btn-sm" id="20_30_e"
+                                    disabled>
+                                    Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>21:00</th>
+                            <td><input id="nom21" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="tel21" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td><input id="obs21" type="text" style="border: 0; width: 100%;" disabled></td>
+                            <td>
+                                <button type="button" class="btnAgendar btn btn-outline-primary btn-sm" id="21_00">
+                                    Agendar
+                                </button>
+                                <button type="button" class="btnEliminar btn btn-outline-danger btn-sm" id="21_00_e"
+                                    disabled>
+                                    Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- End of Main Content -->
+        </div>
+        <!-- End of Content Wrapper -->
+
+    </div>
+    <!-- End of Page Wrapper -->
+</body>
+
+</html>

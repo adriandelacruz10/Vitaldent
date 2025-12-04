@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Vitaldent-Morosos</title>
+    <!-- Scripts de bootstrap-->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+    <!-- Favicon-->
+    <link rel="icon" type="image/x-icon" href="../img/favicon.ico" />
+    <!-- Custom styles for this template-->
+    <link href="../css/sb-admin-2.min.css" rel="stylesheet">
+    <!--Referencias propias-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.7.0/firebase.js"></script>
+    <script src="../js/paciente/morosos.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div>
+              <h3 style="color: blue;"><b>VITALDENT</b></h3>
+            </div>
+          </div>
+          <div class="row justify-content-center">
+            <div id="titulo">
+            </div>
+            <table class="table table-bordered">
+                <thead>
+                  <th style="color: black;">N°</th>
+                  <th style="color: black;">Nombre</th>
+                  <th style="color: black;">Deuda</th>
+                  <th style="color: black;">Último pago</th>
+                  <th style="color: black;">Celular</th>
+                </thead>
+                <tbody id="listaMorosos">
+                  <tr>
+                    <td colspan="5" align="center" style="color: black;">
+                      Bienvenidos al reporte de mora. Información básica sobre los pacientes con deuda mayor a un mes.
+                      <br>
+                      <b>VITALDENT TU SONRISA, TU IMAGEN</b>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <button class="btn btn-primary btn-sm btn-block" id="btnMorosos">MOSTRAR</button> 
+          </div>
+    </div>
+</body>
+
+</html>

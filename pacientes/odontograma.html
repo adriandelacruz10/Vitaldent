@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Vitaldent-Odontograma</title>
+    <!-- Favicon-->
+    <link rel="icon" type="image/x-icon" href="../img/favicon.ico" />
+    <!-- Custom styles for this template-->
+    <link href="../css/sb-admin-2.min.css" rel="stylesheet">
+    <!-- Scripts de bootstrap-->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+    <!--Referencias propias-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.7.0/firebase.js"></script>
+    <script src="../js/paciente/odontograma.js"></script>
+    <!--Estilos propios-->
+    <style>
+        .title-card {
+            border: 0px solid rgba(73,111,219,.25);
+            padding: 5px;
+            box-shadow: 0px 0px 1px rgba(73,111,219, 10);
+            background: rgba(255, 255, 255, 0.6);
+        }
+
+        .row-checked { 
+            background: #c9e9fc;
+        }
+
+        .check-col { 
+            width: 40px; text-align: center; 
+        }
+
+        h1 { text-align: center; color: #2c3e50; margin-bottom: 20px; }
+
+        .panel-diente-actual {
+            background: #fff; 
+            padding-top: 5px;
+            margin: 0 auto 10px; 
+            width: 200px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-radius: 8px; text-align: center;
+        }
+        .panel-diente-actual h3 { margin: 0 0 10px; font-size: 18px; color: #34495e; }
+        .preview {
+            position: relative; width: 80px; height: 96px; margin: 0 auto;
+        }
+        .preview .cara {
+            position: absolute; background: #fcfcfc; border: 2px solid #ccc;
+            box-sizing: border-box; cursor: context-menu;
+        }
+        .preview .sup { top: 0; left: 0; right: 0; height: 16px; }
+        .preview .inf { bottom: 16px; left: 0; right: 0; height: 16px; }
+        .preview .izq { top: 16px; left: 0; width: 16px; bottom: 16px; height: 48px;}
+        .preview .der { top: 16px; right: 0; width: 16px; bottom: 16px; height: 48px;}
+        .preview .cen { top: 16px; left: 16px; width: 48px; height: 48px; }
+        .preview .numero {
+            position: absolute; bottom: 0; width: 100%; text-align: center;
+            font-size: 14px; color: #2c3e50; font-weight: 600;
+        }
+        .odontograma { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        .fila { display: flex; align-items: flex-start; gap: 12px; }
+        .espacio { width: 50px; }
+        .diente {
+            position: relative; width: 60px; height: 72px; background: #fff;
+            border: 2px solid #ddd; border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            transition: transform 0.2s, box-shadow 0.2s; cursor: pointer;
+        }
+        .diente:hover {
+            transform: scale(1.05); box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .diente .cara {
+            position: absolute; background: #fcfcfc; border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+        .diente .sup { top: 2; left: 0; right: 0; height: 16px; }
+        .diente .inf { bottom: 16px; left: 0; right: 0; height: 12px; }
+        .diente .izq { top: 16px; left: 0; bottom: 16px; width: 16px; height: 28px}
+        .diente .der { top: 16px; right: 0; bottom: 16px; width: 16px; height: 28px}
+        .diente .cen { top: 16px; left: 16px; width: 28px; height: 28px; }
+        .diente .numero {
+            position: absolute; bottom: -1px; left: 0; width: 100%;
+            text-align: center; font-size: 14px; font-weight: 600; color: #555;
+        }
+        .menu-contextual {
+            position: fixed; display: none; background: #fff;
+            border: 1px solid #aaa; border-radius: 4px; list-style: none;
+            padding: 0; margin: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+        }
+        .menu-contextual li {
+            padding: 8px 16px; cursor: pointer; white-space: nowrap;
+        }
+        .menu-contextual li:hover {
+            background: #f0f0f0;
+        }
+        /* State colors */
+        .caries    { background: rgba(231,76,60,0.6) !important; }
+        .resina    { background: rgba(52,152,219,0.6) !important; }
+        .amalgama  { background: rgba(189,195,199,0.6) !important; }
+        .sellante  { background: rgba(230,126,34,0.6) !important; }
+        .realizado { background: rgba(46,204,113,0.6) !important; }
+
+        .menu-contextual li {
+            padding: 8px 16px;
+            cursor: pointer;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .menu-contextual li::before {
+            content: "";
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            border: 1px solid #999;
+            display: inline-block;
+        }
+
+        /* Colores según estado */
+        .menu-contextual li[data-estado="caries"]::before {
+            background: rgba(231,76,60,0.6);
+        }
+
+        .menu-contextual li[data-estado="resina"]::before {
+            background: rgba(52,152,219,0.6);
+        }
+
+        .menu-contextual li[data-estado="amalgama"]::before {
+            background: rgba(189,195,199,0.6);
+        }
+
+        .menu-contextual li[data-estado="sellante"]::before {
+            background: rgba(230,126,34,0.6);
+        }
+
+        .menu-contextual li[data-estado="realizado"]::before {
+            background: rgba(46,204,113,0.6);
+        }
+
+        .menu-contextual li[data-estado=""]::before {
+            background: transparent;
+        }
+
+        #barraDeIconos {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            padding: 10px;
+            background: #fff;
+            border-bottom: 1px solid #ccc;
+            margin-bottom: 16px;
+        }
+        .icono {
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            padding: 4px;
+        }
+        .icono svg {
+            width: 45px;
+            height: 45px;
+            border: 1px solid;
+        }
+        #previewIcono {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto;
+            display: none;
+        }
+
+        #previewIcono svg {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+
+<body id="page-top">
+
+    <!-- Page Wrapper -->
+    <div id="wrapper">
+
+        <!-- Menu lateral -->
+        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+
+            <!-- Sidebar - Brand -->
+            <a class="sidebar-brand d-flex align-items-center justify-content-center">
+                <div class="sidebar-brand-icon rotate-n-15">
+                    <i class="fas fa-laugh-wink"></i>
+                </div>
+                <div class="sidebar-brand-text mx-3">
+                    VITALDENT
+                    <div class="sidebar-heading">
+                        TU SONRISA
+                    </div>
+                    <div class="sidebar-heading">
+                        TU IMAGEN
+                    </div>
+                </div> 
+            </a>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider">
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                Pacientes
+            </div>
+            <!-- Nav Item - Charts -->
+            <li class="nav-item">
+                <a class="nav-link" href="inicio.html">
+                    <img src="../img/opciones/lista.png" width="30" height="30">
+                    <span>Ver</span></a>
+            </li>
+            <!-- Nav Item - Tables -->
+            <li class="nav-item">
+                <a class="nav-link" href="agregar.html">
+                    <img src="../img/opciones/agregar.png" width="30" height="30">
+                    <span>Agregar</span></a>
+            </li>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider">
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                Doctores
+            </div>
+            <!-- Nav Item - Charts -->
+            <li class="nav-item">
+                <a class="nav-link" href="../doctores/listado.html">
+                    <img src="../img/opciones/listaD.png" width="30" height="30">
+                    <span>Ver</span></a>
+            </li>
+            <!-- Nav Item - Tables -->
+            <li class="nav-item">
+                <a class="nav-link" href="../doctores/agregar.html">
+                    <img src="../img/opciones/agregarD.png" width="30" height="30">
+                    <span>Agregar</span></a>
+            </li>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider">
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                Acciones
+            </div>
+            <!-- Nav Item - Tables -->
+            <li class="nav-item">
+                <a class="nav-link" href="../acciones/citas.html">
+                    <img src="../img/opciones/cita.png" width="30" height="30">
+                    <span>Citas</span></a>
+            </li>
+            <!-- Nav Item - Tables -->
+            <li class="nav-item">
+                <a class="nav-link" href="../acciones/especialidades.html">
+                    <img src="../img/opciones/especialidad.png" width="30" height="30">
+                    <span>Especialidades</span></a>
+            </li>
+            <!-- Nav Item - Tables -->
+            <li class="nav-item">
+                <a class="nav-link" href="../acciones/tratamientos.html">
+                    <img src="../img/opciones/tratamiento.png" width="30" height="30">
+                    <span>Tratamientos</span></a>
+            </li>
+            <!-- Nav Item - Tables -->
+            <li class="nav-item">
+                <a class="nav-link" href="../acciones/reportes.html">
+                    <img src="../img/opciones/reportes.png" width="30" height="30">
+                    <span>Reportes</span></a>
+            </li>
+            <!-- Nav Item - Tables -->
+            <li class="nav-item">
+                <a class="nav-link" href="../acciones/cumpleaños.html">
+                    <img src="../img/opciones/cumpleaños.png" width="30" height="30">
+                    <span>Cumpleaños</span></a>
+            </li>
+            <!-- Divider -->
+            <hr class="sidebar-divider">
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                @DLC PROGRAMMING
+            </div>
+        </ul>
+
+        <!--Contenido principal-->
+        <div id="content-wrapper" class="d-flex flex-column">
+            <div id="content">
+                <!-- Cabecera -->
+                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+
+                    <!-- Topbar Navbar -->
+                    <ul class="navbar-nav ml-auto">
+
+                        <div class="topbar-divider d-none d-sm-block"></div>
+
+                        <!-- Nav Item - User Information -->
+                        <li class="nav-item dropdown no-arrow">
+                            <div class="dropdown show">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <span class="mr-2 d-none d-lg-inline text-gray-600 small" id="usuario"></span>
+                                    <img class="img-profile rounded-circle" src="../img/perfil.png">
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                                    <a class="dropdown-item" id="btnSalir">Salir</a>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </nav>
+
+                <!--Alerta-->
+                <div id="alerta"></div>
+
+                <!--Botones de opciones-->
+                <div class="form-group">
+                    <div class="col-sm-10">
+                        <button type="button" id="btnCaja" class="btn btn-outline-primary">
+                            <img src="../img/botones/caja.png"> Caja </button>
+                        <button type="button" id="btnCita" class="btn btn-outline-danger">
+                            <img src="../img/botones/cita.png"> Citas</button>
+                        <button type="button" id="btnInformacion" class="btn btn-outline-dark">
+                            <img src="../img/opciones/lista.png"> Información </button>
+                        <button type="button" id="btnGuardar" class="btn btn-outline-success">
+                            <img src="../img/opciones/guardar.png"> Guardar</button>
+                    </div>
+                </div>
+
+                <!--Odontograma del paciente-->
+                <div class="form-group" style="padding: 0px 0px 0px 0px; margin-bottom: 10px;">
+                    <div class="title-card">
+                        <p class="text-center" style="color:#496fdb; font-size: 16px; padding: 0px; margin: 0px;">
+                            <b>Paciente: <span id="txtPaciente"></span></b>
+                        </p>
+                    </div>
+                </div>
+                <div class="panel-diente-actual">
+                    <div class="preview" id="previewDiente">
+                    <div class="cara sup" data-cara="sup"></div>
+                    <div class="cara izq" data-cara="izq"></div>
+                    <div class="cara cen" data-cara="cen"></div>
+                    <div class="cara der" data-cara="der"></div>
+                    <div class="cara inf" data-cara="inf"></div>
+                    <div class="numero">--</div>
+
+                    <div id="previewIcono"></div>
+                    </div>
+                </div>
+                <div id="barraDeIconos">
+                    <button class="icono" data-icono="cuadradoA">
+                    <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="5" y="5" width="90" height="90" fill="none" stroke="#003366" stroke-width="6" />
+                        <rect x="25" y="25" width="50" height="50" fill="none" stroke="#003366" stroke-width="4" />
+                        <rect x="40" y="40" width="20" height="20" fill="#003366" />
+                    </svg>
+                    </button>
+                    <button class="icono" data-icono="cuadradoN">
+                    <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="5" y="5" width="90" height="90" fill="none" stroke="#ea4c16" stroke-width="6" />
+                        <rect x="25" y="25" width="50" height="50" fill="none" stroke="#ea4c16" stroke-width="4" />
+                        <rect x="40" y="40" width="20" height="20" fill="#ea4c16" />
+                    </svg>
+                    </button>
+                    <button class="icono" data-icono="implanteA">
+                    <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M30,30 C30,15 70,15 70,30 C70,40 50,60 50,60 C50,60 30,40 30,30 Z" fill="#003366"/>
+                        <line x1="50" y1="60" x2="40" y2="70" stroke="#003366" stroke-width="3"/>
+                        <line x1="50" y1="65" x2="40" y2="75" stroke="#003366" stroke-width="3"/>
+                        <line x1="50" y1="70" x2="40" y2="80" stroke="#003366" stroke-width="3"/>
+                        <line x1="50" y1="75" x2="40" y2="85" stroke="#003366" stroke-width="3"/>
+                    </svg>
+                    </button>
+                    <button class="icono" data-icono="implanteN">
+                    <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M30,30 C30,15 70,15 70,30 C70,40 50,60 50,60 C50,60 30,40 30,30 Z" fill="#ea4c16"/>
+                        <line x1="50" y1="60" x2="40" y2="70" stroke="#ea4c16" stroke-width="3"/>
+                        <line x1="50" y1="65" x2="40" y2="75" stroke="#ea4c16" stroke-width="3"/>
+                        <line x1="50" y1="70" x2="40" y2="80" stroke="#ea4c16" stroke-width="3"/>
+                        <line x1="50" y1="75" x2="40" y2="85" stroke="#ea4c16" stroke-width="3"/>
+                    </svg>
+                    </button>
+                    <button class="icono" data-icono="equisA">
+                    <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <line x1="20" y1="20" x2="80" y2="80" stroke="#003366" stroke-width="10" />
+                        <line x1="80" y1="20" x2="20" y2="80" stroke="#003366" stroke-width="10" />
+                    </svg>
+                    </button>
+                    <button class="icono" data-icono="equisN">
+                    <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <line x1="20" y1="20" x2="80" y2="80" stroke="#ea4c16" stroke-width="10" />
+                        <line x1="80" y1="20" x2="20" y2="80" stroke="#ea4c16" stroke-width="10" />
+                    </svg>
+                    </button>
+                    <button class="icono" data-icono="trianguloA">
+                    <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <polygon points="50,20 80,75 20,75" fill="#003366" />
+                    </svg>
+                    </button>
+                    <button class="icono" data-icono="trianguloN">
+                    <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <polygon points="50,20 80,75 20,75" fill="#ea4c16" />
+                    </svg>
+                    </button>
+                    <button class="icono" data-icono="lineasA">
+                    <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="15" y="25" width="70" height="20" fill="#003366" />
+                        <rect x="15" y="60" width="70" height="20" fill="#003366" />
+                    </svg>
+                    </button>
+                    <button class="icono" data-icono="lineasN">
+                    <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="15" y="25" width="70" height="20" fill="#ea4c16" />
+                        <rect x="15" y="60" width="70" height="20" fill="#ea4c16" />
+                    </svg>
+                    </button>
+                    <button class="icono" data-icono="inicioBA">
+                    <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="10" y="35" width="35" height="35" fill="white" stroke="#003366" stroke-width="4" />
+                        <rect x="42" y="42" width="58" height="20" fill="#003366" />
+                    </svg>
+                    </button>
+                    <button class="icono" data-icono="curvaBA">
+                    <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M30 25 Q15 50, 30 75" stroke="#003366" stroke-width="14" fill="none" stroke-linecap="round"/>
+                        <rect x="38" y="42" width="62" height="20" fill="#003366"/>
+                    </svg>
+                    </button>
+                    <button class="icono" data-icono="lineaBA">
+                    <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="0" y="42" width="100" height="20" fill="#003366" />
+                    </svg>
+                    </button>
+                    <button class="icono" data-icono="curvaFBA">
+                    <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M70 25 Q85 50, 70 75" stroke="#003366" stroke-width="14" fill="none" stroke-linecap="round"/>
+                        <rect x="0" y="42" width="62" height="20" fill="#003366"/>
+                    </svg>
+                    </button>
+                    <button class="icono" data-icono="finBA">
+                    <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="55" y="35" width="35" height="35" fill="white" stroke="#003366" stroke-width="4" />
+                        <rect x="0" y="42" width="58" height="20" fill="#003366" />
+                    </svg>
+                    </button>
+                    <button class="icono" data-icono="inicioBN">
+                    <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="10" y="35" width="35" height="35" fill="white" stroke="#ea4c16" stroke-width="4" />
+                        <rect x="42" y="42" width="58" height="20" fill="#ea4c16" />
+                    </svg>
+                    </button>
+                    <button class="icono" data-icono="curvaBN">
+                    <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M30 25 Q15 50, 30 75" stroke="#ea4c16" stroke-width="14" fill="none" stroke-linecap="round"/>
+                        <rect x="38" y="42" width="62" height="20" fill="#ea4c16"/>
+                    </svg>
+                    </button>
+                    <button class="icono" data-icono="lineaBN">
+                    <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="0" y="42" width="100" height="20" fill="#ea4c16" />
+                    </svg>
+                    </button>
+                    <button class="icono" data-icono="curvaFBN">
+                    <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M70 25 Q85 50, 70 75" stroke="#ea4c16" stroke-width="14" fill="none" stroke-linecap="round"/>
+                        <rect x="0" y="42" width="62" height="20" fill="#ea4c16"/>
+                    </svg>
+                    </button>
+                    <button class="icono" data-icono="finBN">
+                    <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="55" y="35" width="35" height="35" fill="white" stroke="#ea4c16" stroke-width="4" />
+                        <rect x="0" y="42" width="58" height="20" fill="#ea4c16" />
+                    </svg>
+                    </button>
+                </div>
+                <div class="odontograma">
+                    <div class="fila" id="fila-superior"></div>
+                    <div class="fila" id="fila-temporal-superior"></div>
+                    <div class="fila" id="fila-temporal-inferior"></div>
+                    <div class="fila" id="fila-inferior"></div>
+                </div>
+                <ul class="menu-contextual" id="menuContextual">
+                    <li data-estado="">Diente Sano</li>
+                    <li data-estado="caries">Con Caries</li>
+                    <li data-estado="resina">Con Resina</li>
+                    <li data-estado="amalgama">Con Amalgama</li>
+                    <li data-estado="sellante">Sellante Necesario</li>
+                    <li data-estado="realizado">Sellante Realizado</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
