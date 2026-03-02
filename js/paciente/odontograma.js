@@ -38,6 +38,22 @@ $(document).ready(function () {
     $("#btnInformacion").click(function () {
         location.assign("informacion.html");
     })
+    $("#btnLimpiarDiente").click(function () {
+      if (!selectedTooth) return;
+      if (!confirm("¿Desea limpiar completamente el diente?")) return;
+      const diente = document.querySelector(`.diente[data-num="${selectedTooth}"]`);
+
+      if (diente.classList.contains('custom-svg')) {
+        const fila = diente.parentElement;
+        const nuevo = crearDiente(selectedTooth);
+        fila.replaceChild(nuevo, diente);
+      } else {
+        diente.querySelectorAll('.cara').forEach(c => {
+          estados.forEach(e => c.classList.remove(e));
+        });
+      }
+      selectTooth(selectedTooth);
+    });
 
     //METODOS
     //Crear el diente
@@ -72,24 +88,51 @@ $(document).ready(function () {
     //Seleccionar diente actual
     function selectTooth(num) {
       selectedTooth = num;
-      document.querySelector('#previewDiente .numero').textContent = num;
-      document.querySelectorAll('#previewDiente .cara').forEach(pv=>{
-        pv.className = 'cara ' + pv.dataset.cara;
-        const orig = document.querySelector(`.diente[data-num="${num}"] .cara.${pv.dataset.cara}`);
-        estados.forEach(e => orig.classList.contains(e) && pv.classList.add(e));
-      });
+      document.querySelectorAll('.diente').forEach(d => d.classList.remove('activo'));
+
+      const actual = document.querySelector(`.diente[data-num="${num}"]`);
+      actual.classList.add('activo');
+
+      const preview = document.getElementById("previewDiente");
+
+      if(actual.classList.contains('custom-svg')){
+        preview.innerHTML = actual.innerHTML;
+      }else{
+        preview.innerHTML = `
+          <div class="cara sup" data-cara="sup"></div>
+          <div class="cara izq" data-cara="izq"></div>
+          <div class="cara cen" data-cara="cen"></div>
+          <div class="cara der" data-cara="der"></div>
+          <div class="cara inf" data-cara="inf"></div>
+          <div class="numero">${num}</div>
+        `;
+
+        preview.querySelectorAll('.cara').forEach(pv => {
+          const orig = document.querySelector(
+            `.diente[data-num="${num}"] .cara.${pv.dataset.cara}`
+          );
+          estados.forEach(e => {
+            if (orig && orig.classList.contains(e)) {
+              pv.classList.add(e);
+            }
+          });
+        });
+
+        activarEventosPreview();
+      }
     }
 
-    //Mostrar menu
-    document.querySelectorAll('#previewDiente .cara').forEach(pv => {
-      pv.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        if (!selectedTooth) return;
-        selectedFace = this;
-        showMenu(e.clientX, e.clientY);
+    function activarEventosPreview() {
+      document.querySelectorAll('#previewDiente .cara').forEach(pv => {
+        pv.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (!selectedTooth) return;
+          selectedFace = this;
+          showMenu(e.clientX, e.clientY);
+        });
       });
-    });
+    }
 
     //Items del menu flotante
     if(menu){
@@ -231,21 +274,29 @@ $(document).ready(function () {
     document.querySelectorAll('.icono').forEach(btn => {
       btn.addEventListener('click', () => {
         if (!selectedTooth) return;
+
         const icono = btn.dataset.icono;
         const svgContent = getSVG(icono);
         if (!svgContent) return;
 
         const diente = document.querySelector(`.diente[data-num="${selectedTooth}"]`);
+
         diente.innerHTML = svgContent;
         diente.className = 'diente custom-svg';
+        diente.dataset.num = selectedTooth;
 
         const lbl = document.createElement('div');
         lbl.className = 'numero';
         lbl.textContent = selectedTooth;
         diente.appendChild(lbl);
 
-        document.querySelector('#previewDiente .numero').textContent = selectedTooth;
-        document.querySelectorAll('#previewDiente .cara').forEach(c => c.className = 'cara ' + c.dataset.cara);
+        const preview = document.getElementById("previewDiente");
+        preview.innerHTML = diente.innerHTML;
+
+        const lblPreview = document.createElement('div');
+        lblPreview.className = 'numero';
+        lblPreview.textContent = selectedTooth;
+        preview.appendChild(lblPreview);
       });
     });
     

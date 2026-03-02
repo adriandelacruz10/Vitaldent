@@ -59,6 +59,9 @@ $(document).ready(function () {
                     cadena += "<td>" + factura.tip_fac + "</td>";
                     cadena += "<td>" + factura.doc_fac + "</td>";
                     cadena += "<td>" + (factura.obs_fac  || '') + "</td>";
+                    var des = factura.des_fac == null ? 0 : factura.des_fac;
+                    cadena += "<td>" + (parseFloat(factura.tot_fac) + parseFloat(des)) + "</td>";
+                    cadena += "<td>" + des + "</td>";
                     cadena += "<td>" + factura.tot_fac + "</td>";
                     var pag = (factura.pag_fac == "") ? 0 : factura.pag_fac;
                     cadena += "<td>" + pag + "</td>";
@@ -127,7 +130,7 @@ $(document).ready(function () {
         cadena += "<div class='form-group row'>";
         cadena += "<label class='col-sm-1 col-form-label'>Fecha:</label>";
         cadena += "<div class='col-sm-3'>";
-        cadena += "<input class='form-control' value='" + fechaAct + "' disabled>";
+        cadena += "<input id='txtFechaAbo' type='date' class='form-control' value='" + fechaAct + "'>";
         cadena += "</div>";
         cadena += "</div>"
         cadena += "<div class='form-group row'>";
@@ -233,7 +236,7 @@ $(document).ready(function () {
         referencia.push({
             ced_fac: cedulaPac,
             doc_fac: "",
-            fec_fac: fechaAct,
+            fec_fac: $('#txtFechaAbo').val(),
             nom_fac: nombrePac,
             num_fac: "Abono",
             pag_fac: $("#monto").val(),

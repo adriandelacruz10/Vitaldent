@@ -41,7 +41,11 @@ $(document).ready(function () {
         $("#tratamientos option[value='1']").attr("selected", false);
         var tra = $("#tratamientos").val();
         cargarPrecios(tra);
-    })
+    });
+    //Actualizar total al modificar el descuento
+    $('#txtDescuentoFac').change(function() {
+        $('#totalFac').val($('#totalFactura').val() - $('#txtDescuentoFac').val());
+    });
 
     //METODOS
     //Cargar valores iniciales de la factura
@@ -177,7 +181,8 @@ $(document).ready(function () {
             nom_fac: $("#txtNombre").val(),
             ced_fac: $("#txtCedula").val(),
             doc_fac: $("#doctores").val(),
-            tot_fac: $("#totalFactura").val(),
+            tot_fac: $("#totalFac").val(),
+            des_fac: $("#txtDescuentoFac").val(),
             pag_fac: $("#pagadoFactura").val()
         })
         database.ref();

@@ -73,8 +73,7 @@
         .espacio { width: 50px; }
         .diente {
             position: relative; width: 60px; height: 72px; background: #fff;
-            border: 2px solid #ddd; border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            border: 1px solid #ddd; 
             transition: transform 0.2s, box-shadow 0.2s; cursor: pointer;
         }
         .diente:hover {
@@ -84,11 +83,11 @@
             position: absolute; background: #fcfcfc; border: 1px solid #ccc;
             box-sizing: border-box;
         }
-        .diente .sup { top: 2; left: 0; right: 0; height: 16px; }
-        .diente .inf { bottom: 16px; left: 0; right: 0; height: 12px; }
-        .diente .izq { top: 16px; left: 0; bottom: 16px; width: 16px; height: 28px}
-        .diente .der { top: 16px; right: 0; bottom: 16px; width: 16px; height: 28px}
-        .diente .cen { top: 16px; left: 16px; width: 28px; height: 28px; }
+        .diente .sup { top: 0px; left: 0px; right: 0px; height: 16px;}
+        .diente .inf { bottom: 16px; left: 0; right: 0; height: 16px;}
+        .diente .izq { top: 16px; left: 0; bottom: 16px; width: 16px; height: 22px;}
+        .diente .der { top: 16px; right: 0; bottom: 16px; width: 16px; height: 22px}
+        .diente .cen { top: 16px; left: 16px; width: 26px; height: 22px; }
         .diente .numero {
             position: absolute; bottom: -1px; left: 0; width: 100%;
             text-align: center; font-size: 14px; font-weight: 600; color: #555;
@@ -185,6 +184,20 @@
         #previewIcono svg {
             width: 100%;
             height: 100%;
+        }
+
+        .diente.activo {
+            border: 2px solid #496fdb;
+            box-shadow: 0 0 12px rgba(73,111,219,0.6);
+            transform: scale(1.08);
+        }
+
+        .diente .cara {
+            transition: background 1s ease;
+        }
+
+        .preview .cara {
+            transition: background 1s ease;
         }
     </style>
 </head>
@@ -349,15 +362,19 @@
                 </div>
                 <div class="panel-diente-actual">
                     <div class="preview" id="previewDiente">
-                    <div class="cara sup" data-cara="sup"></div>
-                    <div class="cara izq" data-cara="izq"></div>
-                    <div class="cara cen" data-cara="cen"></div>
-                    <div class="cara der" data-cara="der"></div>
-                    <div class="cara inf" data-cara="inf"></div>
-                    <div class="numero">--</div>
+                        <div class="cara sup" data-cara="sup"></div>
+                        <div class="cara izq" data-cara="izq"></div>
+                        <div class="cara cen" data-cara="cen"></div>
+                        <div class="cara der" data-cara="der"></div>
+                        <div class="cara inf" data-cara="inf"></div>
+                        <div></div>
+                        <div class="numero">
+                            --
+                        </div>
 
-                    <div id="previewIcono"></div>
+                        <div id="previewIcono"></div>
                     </div>
+                    <button type="button" id="btnLimpiarDiente" class="btn btn-outline-danger btn-sm" style="height: 20px; padding: 1px 10px; font-size: 12px; margin-bottom: 5px;">Limpiar</button>
                 </div>
                 <div id="barraDeIconos">
                     <button class="icono" data-icono="cuadradoA">
@@ -503,5 +520,4 @@
         </div>
     </div>
 </body>
-
 </html>
