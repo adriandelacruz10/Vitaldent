@@ -13,11 +13,18 @@ $(document).ready(function () {
     
     //Variables Globales
     var nombrePac = localStorage.getItem("nombrePaciente");
-    var cedulaPac = localStorage.getItem("cedulaPaciente");
+    var idPaciente = localStorage.getItem("idPaciente");
     var fechaAct = fechaActual();
     const estados = ['caries','resina','amalgama','sellante','realizado'];
     const menu = document.getElementById('menuContextual');;
     let selectedTooth = null, selectedFace = null;
+    const caras = [
+      {c:"sup", points:"0,0 100,0 75,25 25,25"},
+      {c:"izq", points:"1,0 25,25 25,75 0,100"},
+      {c:"cen", points:"25,25 75,25 75,75 25,75"},
+      {c:"der", points:"100,0 100,100 75,75 75,25"},
+      {c:"inf", points:"25,75 75,75 100,100 0,100"}
+    ];
 
     //Crear odontrograma al inicar la aplicacion
     crearFilaSeparada([18,17,16,15,14,13,12,11], [21,22,23,24,25,26,27,28],'fila-superior');
@@ -27,6 +34,7 @@ $(document).ready(function () {
 
     //Metodos Iniciales
     cargarUsuario();
+    cargarOdontograma();
 
     //EVENTOS CLICK
     $("#btnCaja").click(function () {
@@ -54,24 +62,38 @@ $(document).ready(function () {
       }
       selectTooth(selectedTooth);
     });
+    $('#btnGuardar').click(() => {
+      guardarOdontograma();
+    });
 
     //METODOS
     //Crear el diente
     function crearDiente(num) {
       const d = document.createElement('div');
-      d.className = 'diente'; 
+      d.className = 'diente';
       d.dataset.num = num;
       d.addEventListener('click', () => selectTooth(num));
-      ['sup','inf','izq','der','cen'].forEach(cara => {
-        const zona = document.createElement('div');
-        zona.className = 'cara ' + cara; 
-        zona.dataset.cara = cara;
-        d.appendChild(zona);
+
+      const svg = document.createElementNS("http://www.w3.org/2000/svg","svg");
+      svg.setAttribute("viewBox","0 0 100 100");
+      svg.style.width="100%";
+      svg.style.height="100%";
+
+      caras.forEach(f=>{
+        const p=document.createElementNS("http://www.w3.org/2000/svg","polygon");
+        p.setAttribute("points",f.points);
+        p.setAttribute("class","cara "+f.c);
+        p.setAttribute("data-cara",f.c);
+        svg.appendChild(p);
       });
-      const lbl = document.createElement('div');
-      lbl.className = 'numero'; 
-      lbl.textContent = num;
+
+      d.appendChild(svg);
+
+      const lbl=document.createElement('div');
+      lbl.className='numero';
+      lbl.textContent=num;
       d.appendChild(lbl);
+
       return d;
     }
 
@@ -98,24 +120,40 @@ $(document).ready(function () {
       if(actual.classList.contains('custom-svg')){
         preview.innerHTML = actual.innerHTML;
       }else{
-        preview.innerHTML = `
-          <div class="cara sup" data-cara="sup"></div>
-          <div class="cara izq" data-cara="izq"></div>
-          <div class="cara cen" data-cara="cen"></div>
-          <div class="cara der" data-cara="der"></div>
-          <div class="cara inf" data-cara="inf"></div>
-          <div class="numero">${num}</div>
-        `;
+        preview.innerHTML = "";
 
-        preview.querySelectorAll('.cara').forEach(pv => {
+        const svgPreview = document.createElementNS("http://www.w3.org/2000/svg","svg");
+        svgPreview.setAttribute("viewBox","0 0 100 100");
+        svgPreview.style.width="80px";
+        svgPreview.style.height="80px";
+
+        caras.forEach(f=>{
+          const p=document.createElementNS("http://www.w3.org/2000/svg","polygon");
+          p.setAttribute("points",f.points);
+          p.setAttribute("class","cara "+f.c);
+          p.setAttribute("data-cara",f.c);
+          svgPreview.appendChild(p);
+        });
+
+        preview.appendChild(svgPreview);
+
+        const lbl=document.createElement("div");
+        lbl.className="numero";
+        lbl.textContent=num;
+        preview.appendChild(lbl);
+
+        svgPreview.querySelectorAll('.cara').forEach(pv => {
+
           const orig = document.querySelector(
-            `.diente[data-num="${num}"] .cara.${pv.dataset.cara}`
+            `.diente[data-num="${num}"] svg .cara[data-cara="${pv.dataset.cara}"]`
           );
-          estados.forEach(e => {
-            if (orig && orig.classList.contains(e)) {
+
+          estados.forEach(e=>{
+            if(orig && orig.classList.contains(e)){
               pv.classList.add(e);
             }
           });
+
         });
 
         activarEventosPreview();
@@ -143,7 +181,7 @@ $(document).ready(function () {
           estados.forEach(e => selectedFace.classList.remove(e));
           if (estado) selectedFace.classList.add(estado);
           const cara = selectedFace.dataset.cara;
-          const mainFace = document.querySelector(`.diente[data-num="${selectedTooth}"] .cara.${cara}`);
+          const mainFace = document.querySelector(`.diente[data-num="${selectedTooth}"] svg .cara[data-cara="${cara}"]`);
           estados.forEach(e => mainFace.classList.remove(e));
           if (estado) mainFace.classList.add(estado);
           menu.style.display = 'none';
@@ -299,7 +337,105 @@ $(document).ready(function () {
         preview.appendChild(lblPreview);
       });
     });
-    
+
+    //Obtener el estado actual del odontograma
+    function obtenerOdontograma(){
+      const datos = {
+        pacienteId: idPaciente,
+        fechaActualizacion: fechaAct,
+        dientes: {}
+      };
+
+      document.querySelectorAll('.diente').forEach(d => {
+        const num = d.dataset.num;
+        if (!num) return;
+        const dienteData = {};
+
+        if (d.classList.contains('custom-svg')) {
+          dienteData.tipo = 'icono';
+          dienteData.icono = d.querySelector('svg')?.outerHTML || '';
+        } else {
+          dienteData.tipo = 'normal';
+          dienteData.caras = {};
+
+          d.querySelectorAll('.cara').forEach(c => {
+            let estado = '';
+            estados.forEach(e => {
+              if (c.classList.contains(e)) estado = e;
+            });
+            dienteData.caras[c.dataset.cara] = estado;
+          });
+        }
+        datos.dientes[num] = dienteData;
+      });
+      return datos;
+    }
+
+    //Actualizar o insertar odontograma actual
+    function guardarOdontograma(){
+      const odontograma = obtenerOdontograma();
+
+      firebase.database().ref('Odontogramas/' + idPaciente).set(odontograma)
+      .then(() => {
+          var alert = "<div class='alert alert-success'>";
+          alert += "<a class='close' data-dismiss='alert'> × </a> <strong> El odontograma ha sido actualizado! </strong>";
+          alert += "</div>";
+          $('#alerta').html(alert);
+          setTimeout(()=>{
+            $('#alerta').css('display', 'none');
+          },2000);
+      }).catch((error) => {
+          var alert = "<div class='alert alert-danger'>";
+          alert += "<a class='close' data-dismiss='alert'> × </a> <strong> Error al guardar el odontograma * ! </strong>";
+          alert += "</div>";
+          $("#alerta").html(alert);
+          setTimeout(()=>{
+            $('#alerta').css('display', 'none');
+          },2000);
+      });
+    }
+
+    //Cargar odontograma existente
+    function cargarOdontograma(){
+      firebase.database().ref('Odontogramas/' + idPaciente).once('value')
+      .then(odontograma => {
+        if(!odontograma.exists()) return;
+        
+        const data = odontograma.val();
+
+        if(!data.dientes) return;
+
+        Object.keys(data.dientes).forEach(num => {
+          const dienteData = data.dientes[num];
+          const diente = document.querySelector(`.diente[data-num="${num}"]`);
+          if(!diente) return;
+
+          if(dienteData.tipo === "icono"){
+            const svgContent = dienteData.icono;
+            diente.innerHTML = svgContent;
+            diente.className = "diente custom-svg";
+            diente.dataset.num = num;
+            const lbl = document.createElement("div");
+            lbl.className = "numero";
+            lbl.textContent = num;
+            diente.appendChild(lbl);
+          }
+
+          if(dienteData.tipo === "normal"){
+            if(!dienteData.caras) return;
+            Object.keys(dienteData.caras).forEach(cara => {
+              const estado = dienteData.caras[cara];
+              if(!estado) return;
+              const face = diente.querySelector(`.cara[data-cara="${cara}"]`);
+              if(face){
+                face.classList.add(estado);
+              }
+            });
+          }
+        });
+      });
+    }
+  
     //Obtiene y devuelve la fecha actual
     function fechaActual() {
         var d = new Date();

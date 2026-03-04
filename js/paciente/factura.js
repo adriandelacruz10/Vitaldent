@@ -155,6 +155,7 @@ $(document).ready(function () {
         });
         $("#listado").html(cadena);
         $("#totalFactura").val(total);
+        $("#totalFac").val(total);
         //Metodos CLIC
         $(".btnEliminar").click(function () {
             var i = this.id;

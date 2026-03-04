@@ -97,8 +97,8 @@ $(document).ready(function () {
             cadena += "<td>" + valor.observacion + "</td>";
             cadena += "<td> <button type='button' class='btnVer btn btn-outline-primary btn-sm'" + "id='" + valor.id + "'>" +
                 "Ver </button> ";
-            cadena += "<button type='button' class='btnCitas btn btn-outline-dark btn-sm'" + "id='" + valor.cedula + "*" + valor.nombre + "*" + valor.telefono + "'>" +
-                "Citas </button> ";
+            /*cadena += "<button type='button' class='btnCitas btn btn-outline-dark btn-sm'" + "id='" + valor.cedula + "*" + valor.nombre + "*" + valor.telefono + "'>" +
+                "Citas </button> ";*/
             cadena += "<button type='button' class='btnCaja btn btn-outline-success btn-sm'" + "id='" + valor.cedula + "*" + valor.nombre + "'>" +
                 "Caja </button> ";
             cadena += "<button type='button' class='btnEliminar btn btn-outline-danger btn-sm'" + "id='" + valor.id + "'>" +
@@ -173,12 +173,12 @@ $(document).ready(function () {
                 cadena += "<td>" + paciente.observacion + "</td>";
                 cadena += "<td> <button type='button' class='btnVer btn btn-outline-primary btn-sm'" + "id='" + paciente.id + "'>" +
                     "Ver </button> ";
-                cadena += "<button type='button' class='btnCitas btn btn-outline-dark btn-sm'" + "id='" + paciente.cedula + "*" + paciente.nombre + "*" + paciente.telefono + "'>" +
-                    "Citas </button> ";
+                /*cadena += "<button type='button' class='btnCitas btn btn-outline-dark btn-sm'" + "id='" + paciente.cedula + "*" + paciente.nombre + "*" + paciente.telefono + "'>" +
+                    "Citas </button> ";*/
                 cadena += "<button type='button' class='btnCaja btn btn-outline-success btn-sm'" + "id='" + paciente.cedula + "*" + paciente.nombre + "'>" +
                     "Caja </button> ";
-                /*cadena += "<button type='button' class='btnOdontograma btn btn-outline-info btn-sm'" + "id='" + paciente.id + "*" + paciente.nombre + "'>" +
-                    "Odo. </button> ";*/
+                cadena += "<button type='button' class='btnOdontograma btn btn-outline-info btn-sm'" + "id='" + paciente.id + "*" + paciente.nombre + "'>" +
+                    "Odo. </button> ";
                 cadena += "<button type='button' class='btnEliminar btn btn-outline-danger btn-sm'" + "id='" + paciente.id + "'>" +
                     "Elim. </button></td>";
                 cadena += "</tr>"
@@ -268,14 +268,14 @@ $(document).ready(function () {
                 cadena += "<td>" + paciente.observacion + "</td>";
                 cadena += "<td> <button type='button' class='btnVer btn btn-outline-primary btn-sm'" + "id='" + paciente.id + "'>" +
                     "Ver </button> ";
-                cadena += "<button type='button' class='btnCitas btn btn-outline-dark btn-sm'" + "id='" + paciente.cedula + "*" + paciente.nombre + "*" + paciente.telefono + "'>" +
-                    "Citas </button> ";
+                /*cadena += "<button type='button' class='btnCitas btn btn-outline-dark btn-sm'" + "id='" + paciente.cedula + "*" + paciente.nombre + "*" + paciente.telefono + "'>" +
+                    "Citas </button> ";*/
                 cadena += "<button type='button' class='btnCaja btn btn-outline-success btn-sm'" + "id='" + paciente.cedula + "*" + paciente.nombre + "'>" +
                     "Caja </button> ";
-                /*cadena += "<button type='button' class='btnOdontograma btn btn-outline-info btn-sm'" + "id='" + paciente.id + "*" + paciente.nombre + "'>" +
-                    "Odo. </button> ";*/
+                cadena += "<button type='button' class='btnOdontograma btn btn-outline-info btn-sm'" + "id='" + paciente.id + "*" + paciente.nombre + "'>" +
+                    "Odo. </button> ";
                 cadena += "<button type='button' class='btnEliminar btn btn-outline-danger btn-sm'" + "id='" + paciente.id + "'>" +
-                    "Elim. </button></td>";
+                    "Eli. </button></td>";
                 cadena += "</tr>";
                 aux = true;
                 i++;
