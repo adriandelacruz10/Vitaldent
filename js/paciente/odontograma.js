@@ -35,6 +35,7 @@ $(document).ready(function () {
     //Metodos Iniciales
     cargarUsuario();
     cargarOdontograma();
+    cargarObservaciones();
 
     //EVENTOS CLICK
     $("#btnCaja").click(function () {
@@ -64,6 +65,9 @@ $(document).ready(function () {
     });
     $('#btnGuardar').click(() => {
       guardarOdontograma();
+    });
+    $('#btnGuardarObservacion').click(() => {
+      guardarObservacion();
     });
 
     //METODOS
@@ -386,7 +390,7 @@ $(document).ready(function () {
           },2000);
       }).catch((error) => {
           var alert = "<div class='alert alert-danger'>";
-          alert += "<a class='close' data-dismiss='alert'> × </a> <strong> Error al guardar el odontograma * ! </strong>";
+          alert += "<a class='close' data-dismiss='alert'> × </a> <strong> Error al guardar el odontograma! </strong>";
           alert += "</div>";
           $("#alerta").html(alert);
           setTimeout(()=>{
@@ -435,22 +439,94 @@ $(document).ready(function () {
         });
       });
     }
+
+    //Guardar la observacion con la fecha y hora actuales
+    function guardarObservacion(){
+      const texto = $('#txtObservacion').val().trim();
+
+      if(texto === "") return;
+
+      const datos = {
+        fecha: fechaHoraActual(),
+        observacion: texto,
+        timestamp: Date.now()
+      };
+
+      firebase.database().ref('Observaciones/' + idPaciente).push(datos)
+      .then(() => {
+        $('#txtObservacion').val("");
+        cargarObservaciones();
+      })
+      .catch(() =>{
+        var alert = "<div class='alert alert-danger'>";
+        alert += "<a class='close' data-dismiss='alert'> × </a> <strong> Error al guardar la observación!</strong>";
+        alert += "</div>";
+        $("#alerta").html(alert);
+        setTimeout(()=>{
+          $('#alerta').css('display', 'none');
+        },2000);
+      });
+    }
+
+    //Cargar observaciones del paciente seleccionado
+    function cargarObservaciones(){
+      const contenedor = $('.lista-observaciones');
+      contenedor.html("");
+
+      firebase.database().ref('Observaciones/' + idPaciente).orderByChild('timestamp').once('value')
+      .then(snapshot => {
+        if(!snapshot.exists()) return;
+        const datos = [];
+        snapshot.forEach(item => {
+            datos.push(item.val());
+        });
+        datos.reverse();
+        datos.forEach(obs => {
+          const item = `
+            <div class="observacion-item">
+              <div class="observacion-top">
+                <span class="observacion-fecha">${obs.fecha}</span>
+              </div>
+              <div class="observacion-texto">
+                ${obs.observacion}
+              </div>
+            </div>
+          `;
+
+          contenedor.append(item);
+        });
+      });
+    }
   
     //Obtiene y devuelve la fecha actual
     function fechaActual() {
-        var d = new Date();
-        var año = d.getFullYear();
-        var mes = d.getMonth();
-        var dia = d.getDate();
-        if (dia < 10) {
-            dia = "0" + dia;
-        }
-        mes = mes + 1;
-        if (mes < 10) {
-            mes = "0" + mes;
-        }
-        var fechaActual = año + "-" + mes + "-" + dia;
-        return fechaActual;
+      var d = new Date();
+      var año = d.getFullYear();
+      var mes = d.getMonth();
+      var dia = d.getDate();
+      if (dia < 10) {
+          dia = "0" + dia;
+      }
+      mes = mes + 1;
+      if (mes < 10) {
+          mes = "0" + mes;
+      }
+      var fechaActual = año + "-" + mes + "-" + dia;
+      return fechaActual;
+    }
+
+    function fechaHoraActual() {
+      const d = new Date();
+
+      let año = d.getFullYear();
+      let mes = String(d.getMonth() + 1).padStart(2, '0');
+      let dia = String(d.getDate()).padStart(2, '0');
+
+      let hora = String(d.getHours()).padStart(2, '0');
+      let minuto = String(d.getMinutes()).padStart(2, '0');
+      let segundos = String(d.getMinutes()).padStart(2, '0');
+
+      return `${año}-${mes}-${dia} ${hora}:${minuto}:${segundos}`;
     }
     
     //Carga el nombre y la imagen de usuario
