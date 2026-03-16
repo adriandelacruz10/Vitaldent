@@ -76,69 +76,35 @@ $(document).ready(function () {
                     var efe = 0;
                     var tra = 0;
                     var tar = 0;
-                    var cadenaPil = "";
-                    var totPil = 0;
-                    var efePil = 0;
-                    var traPil = 0;
-                    var tarPil = 0;
                     snapshot.forEach(function(childSnapshot) {
                         var factura = childSnapshot.val();
                         if(factura.pag_fac != "0" && factura.pag_fac != ""){
-                            if((factura.nom_fac).toUpperCase().includes("PILLARO")){
-                                cadenaPil += "<tr>";
-                                cadenaPil += "<td>" + factura.fec_fac + "</td>";
-                                if(factura.num_fac == "Abono"){
-                                    cadenaPil += "<td>" + factura.num_fac + "</td>";
-                                }else{
-                                    cadenaPil += "<td> Factura </td>";
-                                }
-                                cadenaPil += "<td>" + factura.tip_fac + "</td>";
-                                cadenaPil += "<td>" + factura.ced_fac + "</td>";
-                                cadenaPil += "<td>" + factura.nom_fac + "</td>";
-                                cadenaPil += "<td>" + factura.doc_fac + "</td>";
-                                cadenaPil += "<td style='text-align: right'>" + parseFloat(factura.pag_fac).toFixed(2) + "</td>";
-                                cadenaPil += "<td class='check-col'><input type='checkbox' class='row-check' aria-label='Seleccionar fila'></td>";
-                                cadenaPil += "</tr>";
-                                switch(factura.tip_fac){
-                                    case "Efectivo":
-                                        efePil += parseFloat(factura.pag_fac);
-                                        break;
-                                    case "Transferencia":
-                                        traPil += parseFloat(factura.pag_fac);
-                                        break;
-                                    case "Tarjeta":
-                                        tarPil += parseFloat(factura.pag_fac);
-                                        break;
-                                }
-                                totPil += parseFloat(factura.pag_fac);
+                            cadena += "<tr>";
+                            cadena += "<td>" + factura.fec_fac + "</td>";
+                            if(factura.num_fac == "Abono"){
+                                cadena += "<td>" + factura.num_fac + "</td>";
                             }else{
-                                cadena += "<tr>";
-                                cadena += "<td>" + factura.fec_fac + "</td>";
-                                if(factura.num_fac == "Abono"){
-                                    cadena += "<td>" + factura.num_fac + "</td>";
-                                }else{
-                                    cadena += "<td> Factura </td>";
-                                }
-                                cadena += "<td>" + factura.tip_fac + "</td>";
-                                cadena += "<td>" + factura.ced_fac + "</td>";
-                                cadena += "<td>" + factura.nom_fac + "</td>";
-                                cadena += "<td>" + factura.doc_fac + "</td>";
-                                cadena += "<td style='text-align: right'>" + parseFloat(factura.pag_fac).toFixed(2) + "</td>";
-                                cadena += "<td class='check-col'><input type='checkbox' class='row-check' aria-label='Seleccionar fila'></td>";
-                                cadena += "</tr>";
-                                switch(factura.tip_fac){
-                                    case "Efectivo":
-                                        efe += parseFloat(factura.pag_fac);
-                                        break;
-                                    case "Transferencia":
-                                        tra += parseFloat(factura.pag_fac);
-                                        break;
-                                    case "Tarjeta":
-                                        tar += parseFloat(factura.pag_fac);
-                                        break;
-                                }
-                                tot += parseFloat(factura.pag_fac);
+                                cadena += "<td> Factura </td>";
                             }
+                            cadena += "<td>" + factura.tip_fac + "</td>";
+                            cadena += "<td>" + factura.ced_fac + "</td>";
+                            cadena += "<td>" + factura.nom_fac + "</td>";
+                            cadena += "<td>" + factura.doc_fac + "</td>";
+                            cadena += "<td style='text-align: right'>" + parseFloat(factura.pag_fac).toFixed(2) + "</td>";
+                            cadena += "<td class='check-col'><input type='checkbox' class='row-check' aria-label='Seleccionar fila'></td>";
+                            cadena += "</tr>";
+                            switch(factura.tip_fac){
+                                case "Efectivo":
+                                    efe += parseFloat(factura.pag_fac);
+                                    break;
+                                case "Transferencia":
+                                    tra += parseFloat(factura.pag_fac);
+                                    break;
+                                case "Tarjeta":
+                                    tar += parseFloat(factura.pag_fac);
+                                    break;
+                            }
+                            tot += parseFloat(factura.pag_fac);
                         }
                     });
                     cadena += "<tr>";
@@ -166,32 +132,6 @@ $(document).ready(function () {
                     cadena += "<td></td>";
                     cadena += "</tr>";
                     $("#listado").html(cadena);
-
-                    cadenaPil += "<tr>";
-                    cadenaPil += "<td colspan=5></td>";
-                    cadenaPil += "<td> Total efectivo </td>";
-                    cadenaPil += "<td style='text-align: right'>" + efePil.toFixed(2) +" </td>";
-                    cadenaPil += "<td></td>";
-                    cadenaPil += "</tr>";
-                    cadenaPil += "<tr>";
-                    cadenaPil += "<td colspan=5></td>";
-                    cadenaPil += "<td> Total transferencia </td>";
-                    cadenaPil += "<td style='text-align: right'>" + traPil.toFixed(2) +" </td>";
-                    cadenaPil += "<td></td>";
-                    cadenaPil += "</tr>";
-                    cadenaPil += "<tr>";
-                    cadenaPil += "<td colspan=5></td>";
-                    cadenaPil += "<td> Total tarjeta </td>";
-                    cadenaPil += "<td style='text-align: right'>" + tarPil.toFixed(2) +" </td>";
-                    cadenaPil += "<td></td>";
-                    cadenaPil += "</tr>";
-                    cadenaPil += "<tr>";
-                    cadenaPil += "<td colspan=5></td>";
-                    cadenaPil += "<th> Total general </th>";
-                    cadenaPil += "<td style='text-align: right'> <b>" + totPil.toFixed(2) +"</b> </td>";
-                    cadenaPil += "<td></td>";
-                    cadenaPil += "</tr>";
-                    $("#listadoPillaro").html(cadenaPil);
                 } else {
                     var alerta = "<div class='alert alert-danger'>";
                     alerta += "<a class='close' data-dismiss='alert'> × </a> <strong> No hay facturas para la fecha seleccionada </strong>";
@@ -207,7 +147,7 @@ $(document).ready(function () {
             });
         }
     }
-    $('#listado, #listadoPillaro').on('change', 'input.row-check', function () {
+    $('#listado').on('change', 'input.row-check', function () {
         $(this).closest('tr').toggleClass('row-checked', this.checked);
     });
 
@@ -217,9 +157,7 @@ $(document).ready(function () {
         
         var tipCon = tiempo == "SEM" ? `(Semanal: ${inicio} / ${fin})` : `(Mensual: ${inicio} / ${fin})`;
         $("#txtTipoCon").html(tipCon);
-        $("#txtTipoConPil").html(tipCon);
         $("#listado").empty();
-        $("#listadoPillaro").empty();
 
         var referencia = database.ref("Facturas");
         referencia.orderByChild("fec_fac").startAt(inicio).endAt(fin).once("value")
@@ -230,67 +168,34 @@ $(document).ready(function () {
                 var efe = 0;
                 var tra = 0;
                 var tar = 0;
-                var cadenaPil;
-                var totPil = 0;
-                var efePil = 0;
-                var traPil = 0;
-                var tarPil = 0;
                 snapshot.forEach(function(childSnapshot) {
                     var factura = childSnapshot.val();
                     if(factura.pag_fac != "0" && factura.pag_fac != ""){
-                        if((factura.nom_fac).toUpperCase().includes("PILLARO")){
-                            cadenaPil += "<tr>";
-                            cadenaPil += "<td>" + factura.fec_fac + "</td>";
-                            if(factura.num_fac == "Abono"){
-                                cadenaPil += "<td>" + factura.num_fac + "</td>";
-                            }else{
-                                cadenaPil += "<td> Factura </td>";
-                            }
-                            cadenaPil += "<td>" + factura.tip_fac + "</td>";
-                            cadenaPil += "<td>" + factura.ced_fac + "</td>";
-                            cadenaPil += "<td>" + factura.nom_fac + "</td>";
-                            cadenaPil += "<td>" + factura.doc_fac + "</td>";
-                            cadenaPil += "<td style='text-align: right'>" + parseFloat(factura.pag_fac).toFixed(2) + "</td>";
-                            cadenaPil += "</tr>";
-                            switch(factura.tip_fac){
-                                case "Efectivo":
-                                    efePil += parseFloat(factura.pag_fac);
-                                    break;
-                                case "Transferencia":
-                                    traPil += parseFloat(factura.pag_fac);
-                                    break;
-                                case "Tarjeta":
-                                    tarPil += parseFloat(factura.pag_fac);
-                                    break;
-                            }
-                            totPil += parseFloat(factura.pag_fac);
+                        cadena += "<tr>";
+                        cadena += "<td>" + factura.fec_fac + "</td>";
+                        if(factura.num_fac == "Abono"){
+                            cadena += "<td>" + factura.num_fac + "</td>";
                         }else{
-                            cadena += "<tr>";
-                            cadena += "<td>" + factura.fec_fac + "</td>";
-                            if(factura.num_fac == "Abono"){
-                                cadena += "<td>" + factura.num_fac + "</td>";
-                            }else{
-                                cadena += "<td> Factura </td>";
-                            }
-                            cadena += "<td>" + factura.tip_fac + "</td>";
-                            cadena += "<td>" + factura.ced_fac + "</td>";
-                            cadena += "<td>" + factura.nom_fac + "</td>";
-                            cadena += "<td>" + factura.doc_fac + "</td>";
-                            cadena += "<td style='text-align: right'>" + parseFloat(factura.pag_fac).toFixed(2) + "</td>";
-                            cadena += "</tr>";
-                            switch(factura.tip_fac){
-                                case "Efectivo":
-                                    efe += parseFloat(factura.pag_fac);
-                                    break;
-                                case "Transferencia":
-                                    tra += parseFloat(factura.pag_fac);
-                                    break;
-                                case "Tarjeta":
-                                    tar += parseFloat(factura.pag_fac);
-                                    break;
-                            }
-                            tot += parseFloat(factura.pag_fac);
+                            cadena += "<td> Factura </td>";
                         }
+                        cadena += "<td>" + factura.tip_fac + "</td>";
+                        cadena += "<td>" + factura.ced_fac + "</td>";
+                        cadena += "<td>" + factura.nom_fac + "</td>";
+                        cadena += "<td>" + factura.doc_fac + "</td>";
+                        cadena += "<td style='text-align: right'>" + parseFloat(factura.pag_fac).toFixed(2) + "</td>";
+                        cadena += "</tr>";
+                        switch(factura.tip_fac){
+                            case "Efectivo":
+                                efe += parseFloat(factura.pag_fac);
+                                break;
+                            case "Transferencia":
+                                tra += parseFloat(factura.pag_fac);
+                                break;
+                            case "Tarjeta":
+                                tar += parseFloat(factura.pag_fac);
+                                break;
+                        }
+                        tot += parseFloat(factura.pag_fac);
                     }
                 });
                 cadena += "<tr>";
@@ -314,28 +219,6 @@ $(document).ready(function () {
                 cadena += "<td style='text-align: right'> <b>" + tot.toFixed(2) +"</b> </td>";
                 cadena += "</tr>";
                 $("#listado").html(cadena);
-
-                cadenaPil += "<tr>";
-                cadenaPil += "<td colspan=5></td>";
-                cadenaPil += "<td> Total efectivo </td>";
-                cadenaPil += "<td style='text-align: right'>" + efePil.toFixed(2) +" </td>";
-                cadenaPil += "</tr>";
-                cadenaPil += "<tr>";
-                cadenaPil += "<td colspan=5></td>";
-                cadenaPil += "<td> Total transferencia </td>";
-                cadenaPil += "<td style='text-align: right'>" + traPil.toFixed(2) +" </td>";
-                cadenaPil += "</tr>";
-                cadenaPil += "<tr>";
-                cadenaPil += "<td colspan=5></td>";
-                cadenaPil += "<td> Total tarjeta </td>";
-                cadenaPil += "<td style='text-align: right'>" + tarPil.toFixed(2) +" </td>";
-                cadenaPil += "</tr>";
-                cadenaPil += "<tr>";
-                cadenaPil += "<td colspan=5></td>";
-                cadenaPil += "<th> Total general </th>";
-                cadenaPil += "<td style='text-align: right'> <b>" + totPil.toFixed(2) +"</b> </td>";
-                cadenaPil += "</tr>";
-                $("#listadoPillaro").html(cadenaPil);
             } else {
                 var alerta = "<div class='alert alert-danger'>";
                 alerta += "<a class='close' data-dismiss='alert'> × </a> <strong> No hay facturas para la fecha seleccionada </strong>";

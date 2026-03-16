@@ -64,6 +64,7 @@ $(document).ready(function () {
             "<br><b>VITALDENT TU SONRISA, TU IMAGEN</b></td>";
         $("#listado").html(mensaje);
         var referencia = database.ref("Pacientes").orderByChild('nom_pac');
+        //var referencia = database.ref("Facturas").orderByChild('nom_fac');
         referencia.on("value", function (datos) {
             datos.forEach(function(snap){
                 var paciente = new Object();
