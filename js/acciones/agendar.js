@@ -11,6 +11,21 @@ $(document).ready(function () {
     //Inicializar firebase
     firebase.initializeApp(firebaseConfig);
     var database = firebase.database();
+    var horarios = [
+        "8:00", "8:30",
+        "9:00", "9:30",
+        "10:00", "10:30",
+        "11:00", "11:30",
+        "12:00", "12:30",
+        "15:00", "15:30",
+        "16:00", "16:30",
+        "17:00", "17:30",
+        "18:00", "18:30",
+        "19:00", "19:30",
+        "20:00", "20:30",
+        "21:00"
+    ];
+    var pacientesIndex = {};
     //Llenar el nombre del usuario
     cargarUsuario();
     //Cargar iniciales
@@ -22,41 +37,40 @@ $(document).ready(function () {
 
     //EVENTOS CLICk
     //Mostrar elementos para un cita
-    $(".btnAgendar").click(function () {
+    $(document).on("click", ".btnAgendar", function () {
         var id = this.id;
         hora = id.replace("_", ":");
-        var cadena = "<hr>";
+
+        var cadena = "";
+        cadena += "<h5 style='font-weight:700; color:#1f2937; margin-bottom:18px;'>Selecciona el tipo de cita</h5>";
         cadena += "<form>";
-        cadena += "<button type='button' class='btn btn-outline-dark' id='btnNuevo'>Nuevo paciente</button> ";
+        cadena += "<button type='button' class='btn btn-outline-dark mr-2' id='btnNuevo'>Nuevo paciente</button>";
         cadena += "<button type='button' class='btn btn-outline-primary' id='btnExiste'>Paciente existente</button>";
-        cadena += "</div>"
-        cadena += "</div>";
-        cadena += "</form>"
-        cadena += "<hr>";
+        cadena += "</form>";
+
         $("#agendar").html(cadena);
+        $("#datosCita").html("");
         location.assign("#usuario");
-        //Eventos click de botones recien creados
+
         $("#btnNuevo").click(function () {
             mostrarElementosNuevo(hora);
             $('#btnNuevo').attr('disabled', true);
             $('#btnExiste').attr('disabled', false);
-        })
+        });
+
         $("#btnExiste").click(function () {
             mostrarElementosExiste(hora);
             $('#btnExiste').attr('disabled', true);
             $('#btnNuevo').attr('disabled', false);
-        })
-    })
+        });
+    });
     //Eliminar cita
-    $(".btnEliminar").click(function () {
-        var horas = this.id.split("_");
-        var hora = horas[0] + ":" + horas[1];
-        if (confirm("¿Esta seguro que desea eliminar la cita?") == true) {
-            eliminarCita(hora);
+    $(document).on("click", ".btnEliminarCita", function () {
+        var id = $(this).data("id");
+        if (confirm("¿Está seguro que desea eliminar esta cita?") === true) {
+            eliminarCitaPorId(id);
         }
-        encerarCampos();
-        cargarCitas();
-    })
+    });
     //Ir a las citas pendientes
     $("#btnPendientes").click(function () {
         location.assign("citas.html");
@@ -67,462 +81,325 @@ $(document).ready(function () {
     })
     //Cambiar el calendario
     $("#fecha").change(function () {
-        encerarCampos();
+        $("#agendar").html("");
+        $("#datosCita").html("");
         cargarCitas();
-    })
+    });
 
     //METODOS
+    function horaAId(hora) {
+        return hora.replace(":", "_");
+    }
+    //Generar la tabla de citas
+    function renderTablaCitas(citasAgrupadas) {
+        var html = "";
+
+        $.each(horarios, function (_, hora) {
+            var idHora = horaAId(hora);
+            var citasHora = citasAgrupadas[hora] || [];
+
+            html += "<tr>";
+            html += "<th class='agenda-hour'>" + hora + "</th>";
+            html += "<td>";
+            html += "<div class='slot-list'>";
+
+            if (citasHora.length === 0) {
+                html += "<div class='slot-card empty'>Sin citas agendadas</div>";
+            } else {
+                $.each(citasHora, function (_, cita) {
+                    html += "<div class='slot-card'>";
+                    html += "<div class='slot-name'>" + (cita.nom_age || "") + "</div>";
+                    html += "<div class='slot-meta'><strong>Tel:</strong> " + (cita.tel_age || "") + "</div>";
+                    html += "<div class='slot-obs'><strong>Obs:</strong> " + (cita.obs_age || "") + "</div>";
+                    html += "<div class='slot-actions'>";
+                    html += "<button type='button' class='btn btn-agenda-danger btn-sm btnEliminarCita' data-id='" + cita.id + "'>Eliminar</button>";
+                    html += "</div>";
+                    html += "</div>";
+                });
+            }
+
+            html += "</div>";
+            html += "</td>";
+
+            html += "<td>";
+            html += "<div class='agenda-add-wrap'>";
+            if (citasHora.length < 2) {
+                html += "<button type='button' class='btnAgendar btn btn-agenda-primary btn-sm' id='" + idHora + "'>Agendar</button>";
+            } else {
+                html += "<button type='button' class='btn btn-secondary btn-sm' disabled>Cupo lleno</button>";
+            }
+            html += "</div>";
+            html += "</td>";
+            html += "</tr>";
+        });
+
+        $("#tablaCitasBody").html(html);
+    }
     //Mostrar los elemntos para agregar cita con paciente nuevo
     function mostrarElementosNuevo(hora) {
-        var cadena = "<hr>";
+        var cadena = "";
+        cadena += "<h5 style='font-weight:700; color:#1f2937; margin-bottom:18px;'>Nueva cita</h5>";
         cadena += "<form>";
         cadena += "<div class='form-group row'>";
-        cadena += "<label class='col-sm-1 col-form-label'>Paciente:</label>";
-        cadena += "<div class='col-sm-5'>";
-        cadena += "<input type='text'class='form-control' id='pacientes'>";
+        cadena += "<label class='col-sm-2 col-form-label'>Paciente:</label>";
+        cadena += "<div class='col-sm-6'>";
+        cadena += "<input type='text' class='form-control' id='pacientes'>";
         cadena += "</div>";
-        cadena += "</div>"
+        cadena += "</div>";
         cadena += "<div class='form-group row'>";
-        cadena += "<label class='col-sm-1 col-form-label'>Hora de la cita:</label>";
-        cadena += "<div class='col-sm-5'>";
-        cadena += "<input type='text'class='form-control' id='hora' disabled value='" + hora + "'>";
+        cadena += "<label class='col-sm-2 col-form-label'>Hora:</label>";
+        cadena += "<div class='col-sm-6'>";
+        cadena += "<input type='text' class='form-control' id='hora' disabled value='" + hora + "'>";
         cadena += "</div>";
-        cadena += "</div>"
+        cadena += "</div>";
         cadena += "<div class='form-group row'>";
-        cadena += "<label class='col-sm-1 col-form-label'>Teléfono:</label>";
-        cadena += "<div class='col-sm-5'>";
-        cadena += "<input type='text'class='form-control' id='telefono'>";
+        cadena += "<label class='col-sm-2 col-form-label'>Teléfono:</label>";
+        cadena += "<div class='col-sm-6'>";
+        cadena += "<input type='text' class='form-control' id='telefono'>";
         cadena += "</div>";
-        cadena += "</div>"
+        cadena += "</div>";
         cadena += "<div class='form-group row'>";
-        cadena += "<label class='col-sm-1 col-form-label'>Observación:</label>";
-        cadena += "<div class='col-sm-5'>";
-        cadena += "<input type='text'class='form-control' id='observacion'>";
+        cadena += "<label class='col-sm-2 col-form-label'>Observación:</label>";
+        cadena += "<div class='col-sm-6'>";
+        cadena += "<input type='text' class='form-control' id='observacion'>";
         cadena += "</div>";
-        cadena += "</div>"
+        cadena += "</div>";
         cadena += "<div class='form-group'>";
-        cadena += "<div class='col-sm-10'>"
-        cadena += "<button type='button' class='btn btn-outline-success' id='btnGuardar'>Guardar</button> ";
-        cadena += "<button type='button' class='btn btn-outline-danger' id='btnCancelar'>Cancelar</button>";
-        cadena += "</div>"
+        cadena += "<div class='col-sm-10 pl-0'>";
+        cadena += "<button type='button' class='btn btn-success mr-2' id='btnGuardar'>Guardar</button>";
+        cadena += "<button type='button' class='btn btn-outline-secondary' id='btnCancelar'>Cancelar</button>";
         cadena += "</div>";
-        cadena += "</form>"
-        cadena += "<hr>";
+        cadena += "</div>";
+        cadena += "</form>";
+
         $("#datosCita").html(cadena);
-        //Eventos click de botones recien creados
+
         $("#btnGuardar").click(function () {
             insertarCitaNueva();
-        })
+        });
+
         $("#btnCancelar").click(function () {
             $("#agendar").html("");
             $("#datosCita").html("");
-        })
+        });
     }
 
     //Mostrar los elemntos para agregar cita con paciente que existe
     function mostrarElementosExiste(hora) {
-        var cadena = "<hr>";
+        var cadena = "";
+        cadena += "<h5 style='font-weight:700; color:#1f2937; margin-bottom:18px;'>Agendar paciente existente</h5>";
         cadena += "<form>";
         cadena += "<div class='form-group row'>";
-        cadena += "<label class='col-sm-1 col-form-label'>Paciente:</label>";
-        cadena += "<div class='col-sm-5'>";
-        cadena += "<select class='custom-select' id='pacientes'></select>";
+        cadena += "<label class='col-sm-2 col-form-label'>Paciente:</label>";
+        cadena += "<div class='col-sm-6'>";
+        cadena += "<input type='text' class='form-control' id='pacientes' list='listaPacientes' placeholder='Escriba para buscar...'>";
+        cadena += "<datalist id='listaPacientes'></datalist>";
+        cadena += "<div class='search-hint'>Escriba el nombre del paciente para buscarlo.</div>";
         cadena += "</div>";
-        cadena += "</div>"
+        cadena += "</div>";
         cadena += "<div class='form-group row'>";
-        cadena += "<label class='col-sm-1 col-form-label'>Hora de la cita:</label>";
-        cadena += "<div class='col-sm-5'>";
-        cadena += "<input type='text'class='form-control' id='hora' disabled value='" + hora + "'>";
+        cadena += "<label class='col-sm-2 col-form-label'>Hora:</label>";
+        cadena += "<div class='col-sm-6'>";
+        cadena += "<input type='text' class='form-control' id='hora' disabled value='" + hora + "'>";
         cadena += "</div>";
-        cadena += "</div>"
+        cadena += "</div>";
         cadena += "<div class='form-group row'>";
-        cadena += "<label class='col-sm-1 col-form-label'>Observación:</label>";
-        cadena += "<div class='col-sm-5'>";
-        cadena += "<input type='text'class='form-control' id='observacion'>";
+        cadena += "<label class='col-sm-2 col-form-label'>Observación:</label>";
+        cadena += "<div class='col-sm-6'>";
+        cadena += "<input type='text' class='form-control' id='observacion'>";
         cadena += "</div>";
-        cadena += "</div>"
+        cadena += "</div>";
         cadena += "<div class='form-group'>";
-        cadena += "<div class='col-sm-10'>"
-        cadena += "<button type='button' class='btn btn-outline-success' id='btnGuardar'>Guardar</button> ";
-        cadena += "<button type='button' class='btn btn-outline-danger' id='btnCancelar'>Cancelar</button>";
-        cadena += "</div>"
+        cadena += "<div class='col-sm-10 pl-0'>";
+        cadena += "<button type='button' class='btn btn-success mr-2' id='btnGuardar'>Guardar</button>";
+        cadena += "<button type='button' class='btn btn-outline-secondary' id='btnCancelar'>Cancelar</button>";
         cadena += "</div>";
-        cadena += "</form>"
-        cadena += "<hr>";
+        cadena += "</div>";
+        cadena += "</form>";
+
         $("#datosCita").html(cadena);
-        //Cargar datos
+
         cargarPacientes();
-        //Eventos click de botones recien creados
+
         $("#btnGuardar").click(function () {
             insertarCita();
-        })
+        });
+
         $("#btnCancelar").click(function () {
             $("#agendar").html("");
             $("#datosCita").html("");
-        })
+        });
     }
 
     //Cargar los datos segun la fecha
     function cargarCitas() {
-        var referencia = database.ref();
-        var citas = [];
         var fecha = $("#fecha").val();
-        referencia.child("Agendadas").orderByChild("fec_age").equalTo(fecha).on("value", snapshot => {
+
+        database.ref("Agendadas").orderByChild("fec_age").equalTo(fecha).once("value", function (snapshot) {
+            var citasAgrupadas = {};
+
+            $.each(horarios, function (_, hora) {
+                citasAgrupadas[hora] = [];
+            });
+
             if (snapshot.exists()) {
-                citas = snapshot.val();
-                var a1 = a2 = a3 = a4 = a5 = a6 = a7 = a8 = a9 = a10 = a11 = a12 = a13 = a14 = a15 = a16 = a17 = a18 = a19 = a20 = a21 = a22 = a23 = 1;
-                //var a1 = 1;
-                //var a2 = 1;
-                $.each(citas, function (id, cita) {
-                    if (cita.est_age == "Nueva") {
-                        if (cita.hor_age == "8:00") {
-                            $("#nom22").val(cita.nom_age);
-                            $("#tel22").val(cita.tel_age);
-                            $("#obs22").val(cita.obs_age);
-                            if (a1 >= 2) {
-                                $("#8_00").attr("disabled", true);
-                                $("#8_00_e").attr("disabled", false);
-                            }
-                            a1 += 1;
-                        }
-                        if (cita.hor_age == "8:30") {
-                            $("#nom23").val(cita.nom_age);
-                            $("#tel23").val(cita.tel_age);
-                            $("#obs23").val(cita.obs_age);
-                            if (a2 >= 2) {
-                                $("#8_30").attr("disabled", true);
-                                $("#8_30_e").attr("disabled", false);
-                            }
+                snapshot.forEach(function (child) {
+                    var cita = child.val();
 
-                            a2 += 1;
-                        }
-                        if (cita.hor_age == "9:00") {
-                            $("#nom1").val(cita.nom_age);
-                            $("#tel1").val(cita.tel_age);
-                            $("#obs1").val(cita.obs_age);
-                            if (a3 >= 2) {
-                                $("#9_00").attr("disabled", true);
-                                $("#9_00_e").attr("disabled", false);
-                            }
-                            a3 += 1;
-                        }
-                        if (cita.hor_age == "9:30") {
-                            $("#nom2").val(cita.nom_age);
-                            $("#tel2").val(cita.tel_age);
-                            $("#obs2").val(cita.obs_age);
-                            if (a4 >= 2) {
-                                $("#9_30").attr("disabled", true);
-                                $("#9_30_e").attr("disabled", false);
-                            }
-                            a4 += 1;
-                        }
-                        if (cita.hor_age == "10:00") {
-                            $("#nom3").val(cita.nom_age);
-                            $("#tel3").val(cita.tel_age);
-                            $("#obs3").val(cita.obs_age);
-                            if (a5 >= 2) {
-                                $("#10_00").attr("disabled", true);
-                                $("#10_00_e").attr("disabled", false);
-                            }
-                            a5 += 1;
-                        }
-                        if (cita.hor_age == "10:30") {
-                            $("#nom4").val(cita.nom_age);
-                            $("#tel4").val(cita.tel_age);
-                            $("#obs4").val(cita.obs_age);
-                            if (a6 >= 2) {
-                                $("#10_30").attr("disabled", true);
-                                $("#10_30_e").attr("disabled", false);
-                            }
-                            a6 += 1;
-                        }
-                        if (cita.hor_age == "11:00") {
-                            $("#nom5").val(cita.nom_age);
-                            $("#tel5").val(cita.tel_age);
-                            $("#obs5").val(cita.obs_age);
-                            if (a7 >= 2) {
-                                $("#11_00").attr("disabled", true);
-                                $("#11_00_e").attr("disabled", false);
-                            }
-                            a7 += 1;
-                        }
-                        if (cita.hor_age == "11:30") {
-                            $("#nom6").val(cita.nom_age);
-                            $("#tel6").val(cita.tel_age);
-                            $("#obs6").val(cita.obs_age);
-                            if (a8 >= 2) {
-                                $("#11_30").attr("disabled", true);
-                                $("#11_30_e").attr("disabled", false);
-                            }
-                            a8 += 1;
-                        }
-                        if (cita.hor_age == "12:00") {
-                            $("#nom7").val(cita.nom_age);
-                            $("#tel7").val(cita.tel_age);
-                            $("#obs7").val(cita.obs_age);
-                            if (a9 >= 2) {
-                                $("#12_00").attr("disabled", true);
-                                $("#12_00_e").attr("disabled", false);
-                            }
-                            a9 += 1;
-                        }
-                        if (cita.hor_age == "12:30") {
-                            $("#nom8").val(cita.nom_age);
-                            $("#tel8").val(cita.tel_age);
-                            $("#obs8").val(cita.obs_age);
-                            if (a10 >= 2) {
-                                $("#12_30").attr("disabled", true);
-                                $("#12_30_e").attr("disabled", false);
-                            }
-                            a10 += 1;
-                        }
-                        if (cita.hor_age == "15:00") {
-                            $("#nom9").val(cita.nom_age);
-                            $("#tel9").val(cita.tel_age);
-                            $("#obs9").val(cita.obs_age);
-                            if (a11 >= 2) {
-                                $("#15_00").attr("disabled", true);
-                                $("#15_00_e").attr("disabled", false);
-                            }
-                            a11 += 1;
-                        }
-                        if (cita.hor_age == "15:30") {
-                            $("#nom10").val(cita.nom_age);
-                            $("#tel10").val(cita.tel_age);
-                            $("#obs10").val(cita.obs_age);
-                            if (a12 >= 2) {
-                                $("#15_30").attr("disabled", true);
-                                $("#15_30_e").attr("disabled", false);
-                            }
-                            a12 += 1;
-                        }
-                        if (cita.hor_age == "16:00") {
-                            $("#nom11").val(cita.nom_age);
-                            $("#tel11").val(cita.tel_age);
-                            $("#obs11").val(cita.obs_age);
-                            if (a13 >= 2) {
-                                $("#16_00").attr("disabled", true);
-                                $("#16_00_e").attr("disabled", false);
-                            }
-                            a13 += 1;
+                    if (cita.est_age === "Nueva") {
+                        var hora = cita.hor_age;
 
+                        if (!citasAgrupadas[hora]) {
+                            citasAgrupadas[hora] = [];
                         }
-                        if (cita.hor_age == "16:30") {
-                            $("#nom12").val(cita.nom_age);
-                            $("#tel12").val(cita.tel_age);
-                            $("#obs12").val(cita.obs_age);
-                            if (a14 >= 2) {
-                                $("#16_30").attr("disabled", true);
-                                $("#16_30_e").attr("disabled", false);
-                            }
-                            a14 += 1;
-                        }
-                        if (cita.hor_age == "17:00") {
-                            $("#nom13").val(cita.nom_age);
-                            $("#tel13").val(cita.tel_age);
-                            $("#obs13").val(cita.obs_age);
-                            if (a15 >= 2) {
-                                $("#17_00").attr("disabled", true);
-                                $("#17_00_e").attr("disabled", false);
-                            }
-                            a15 += 1;
-                        }
-                        if (cita.hor_age == "17:30") {
-                            $("#nom14").val(cita.nom_age);
-                            $("#tel14").val(cita.tel_age);
-                            $("#obs14").val(cita.obs_age);
-                            if (a16 >= 2) {
-                                $("#17_30").attr("disabled", true);
-                                $("#17_30_e").attr("disabled", false);
-                            }
-                            a16 += 1;
-                        }
-                        if (cita.hor_age == "18:00") {
-                            $("#nom15").val(cita.nom_age);
-                            $("#tel15").val(cita.tel_age);
-                            $("#obs15").val(cita.obs_age);
-                            if (a17 >= 2) {
-                                $("#18_00").attr("disabled", true);
-                                $("#18_00_e").attr("disabled", false);
-                            }
-                            a17 += 1;
-                        }
-                        if (cita.hor_age == "18:30") {
-                            $("#nom16").val(cita.nom_age);
-                            $("#tel16").val(cita.tel_age);
-                            $("#obs16").val(cita.obs_age);
-                            if (a18 >= 2) {
-                                $("#18_30").attr("disabled", true);
-                                $("#18_30_e").attr("disabled", false);
-                            }
-                            a18 += 1;
-                        }
-                        if (cita.hor_age == "19:00") {
-                            $("#nom17").val(cita.nom_age);
-                            $("#tel17").val(cita.tel_age);
-                            $("#obs17").val(cita.obs_age);
-                            if (a19 >= 2) {
-                                $("#19_00").attr("disabled", true);
-                                $("#19_00_e").attr("disabled", false);
-                            }
-                            a19 += 1;
 
-                        }
-                        if (cita.hor_age == "19:30") {
-                            $("#nom18").val(cita.nom_age);
-                            $("#tel18").val(cita.tel_age);
-                            $("#obs18").val(cita.obs_age);
-                            if (a20 >= 2) {
-                                $("#19_30").attr("disabled", true);
-                                $("#19_30_e").attr("disabled", false);
-                            }
-                            a20 += 1;
-
-                        }
-                        if (cita.hor_age == "20:00") {
-                            $("#nom19").val(cita.nom_age);
-                            $("#tel19").val(cita.tel_age);
-                            $("#obs19").val(cita.obs_age);
-                            if (a21 >= 2) {
-                                $("#20_00").attr("disabled", true);
-                                $("#20_00_e").attr("disabled", false);
-                            }
-                            a21 += 1;
-
-                        }
-                        if (cita.hor_age == "20:30") {
-                            $("#nom20").val(cita.nom_age);
-                            $("#tel20").val(cita.tel_age);
-                            $("#obs20").val(cita.obs_age);
-                            if (a22 >= 2) {
-                                $("#20_30").attr("disabled", true);
-                                $("#20_30_e").attr("disabled", false);
-                            }
-                            a22 += 1;
-                        }
-                        if (cita.hor_age == "21:00") {
-                            $("#nom21").val(cita.nom_age);
-                            $("#tel21").val(cita.tel_age);
-                            $("#obs21").val(cita.obs_age);
-                            if (a23 >= 2) {
-                                $("#21_00").attr("disabled", true);
-                                $("#21_00_e").attr("disabled", false);
-                            }
-                            a23 += 1;
-                        }
+                        citasAgrupadas[hora].push({
+                            id: child.key,
+                            nom_age: cita.nom_age || "",
+                            tel_age: cita.tel_age || "",
+                            obs_age: cita.obs_age || "",
+                            hor_age: cita.hor_age || "",
+                            fec_age: cita.fec_age || "",
+                            est_age: cita.est_age || ""
+                        });
                     }
-                })
+                });
             }
-        })
+
+            renderTablaCitas(citasAgrupadas);
+        });
     }
 
     //Cargar date con los valores iniciales
     function cargarCalendario() {
         var fecha = fechaActual();
-        $("#fecha").attr("value", fecha);
+        $("#fecha").val(fecha);
         $("#fecha").attr("min", fecha);
     }
 
     //Carga los pacientes
     function cargarPacientes() {
         var referencia = database.ref("Pacientes");
-        var pacientes = [];
-        referencia.on("value", function (datos) {
-            pacientes = datos.val();
-            $.each(pacientes, function (id, paciente) {
-                var cadena = "<option value='" + paciente.tel1_pac + "-" + paciente.nom_pac + "'>" + paciente.nom_pac + "</option>"
-                $(cadena).appendTo("#pacientes");
-            })
-        })
+
+        pacientesIndex = {};
+        $("#listaPacientes").html("");
+
+        referencia.once("value", function (datos) {
+            if (datos.exists()) {
+                datos.forEach(function (child) {
+                    var paciente = child.val();
+                    var nombre = paciente.nom_pac || "";
+                    var telefono = paciente.tel1_pac || "";
+
+                    pacientesIndex[nombre] = {
+                        nombre: nombre,
+                        telefono: telefono
+                    };
+
+                    $("#listaPacientes").append(
+                        "<option value='" + nombre.replace(/'/g, "&#39;") + "'></option>"
+                    );
+                });
+            }
+        });
     }
     //Inserta la cita nueva
     function insertarCitaNueva() {
-        var referencia = database.ref("Agendadas");
-        referencia.push({
-            nom_age: $("#pacientes").val(),
-            tel_age: $("#telefono").val(),
-            obs_age: $("#observacion").val(),
-            fec_age: $("#fecha").val(),
-            hor_age: $("#hora").val(),
-            est_age: "Nueva",
-            asi_age: ""
-        })
-        $("#datosCita").html("");
-        $("#agendar").html("");
+        var fecha = $("#fecha").val();
+        var hora = $("#hora").val();
+
+        database.ref("Agendadas")
+            .orderByChild("fec_age")
+            .equalTo(fecha)
+            .once("value", function (snapshot) {
+                var totalHora = 0;
+
+                if (snapshot.exists()) {
+                    snapshot.forEach(function (child) {
+                        var cita = child.val();
+                        if (cita.hor_age === hora && cita.est_age === "Nueva") {
+                            totalHora++;
+                        }
+                    });
+                }
+
+                if (totalHora >= 2) {
+                    alert("Esta hora ya tiene 2 citas agendadas.");
+                    return;
+                }
+
+                database.ref("Agendadas").push({
+                    nom_age: $("#pacientes").val(),
+                    tel_age: $("#telefono").val(),
+                    obs_age: $("#observacion").val(),
+                    fec_age: fecha,
+                    hor_age: hora,
+                    est_age: "Nueva",
+                    asi_age: ""
+                }, function () {
+                    $("#datosCita").html("");
+                    $("#agendar").html("");
+                    cargarCitas();
+                });
+            });
     }
 
     //Inserta la cita
     function insertarCita() {
-        var datos = [];
-        datos = $("#pacientes").val().split("-");
-        var tel = datos[0];
-        var nom = datos[1];
-        var referencia = database.ref("Agendadas");
-        referencia.push({
-            nom_age: nom,
-            tel_age: tel,
-            obs_age: $("#observacion").val(),
-            fec_age: $("#fecha").val(),
-            hor_age: $("#hora").val(),
-            est_age: "Nueva",
-            asi_age: ""
-        })
-        $("#datosCita").html("");
-        $("#agendar").html("");
-    }
-    //Encerar campos 
-    function encerarCampos() {
-        var i = 8;
-        while (i < 13) {
-            var btn1 = "#" + i + "_00";
-            var btn2 = "#" + i + "_00_e";
-            var btn3 = "#" + i + "_30";
-            var btn4 = "#" + i + "_30_e";
-            $(btn1).attr("disabled", false);
-            $(btn2).attr("disabled", true);
-            $(btn3).attr("disabled", false);
-            $(btn4).attr("disabled", true);
-            i++;
+        var nombreBuscado = ($("#pacientes").val() || "").trim();
+
+        if (nombreBuscado === "" || !pacientesIndex[nombreBuscado]) {
+            alert("Seleccione un paciente válido de la lista.");
+            return;
         }
-        var n = 15;
-        while (n < 22) {
-            var btn1 = "#" + n + "_00";
-            var btn2 = "#" + n + "_00_e";
-            var btn3 = "#" + n + "_30";
-            var btn4 = "#" + n + "_30_e";
-            $(btn1).attr("disabled", false);
-            $(btn2).attr("disabled", true);
-            $(btn3).attr("disabled", false);
-            $(btn4).attr("disabled", true);
-            n++;
-        }
-        for (let index = 1; index < 24; index++) {
-            var nom = "#nom" + index;
-            var tel = "#tel" + index;
-            var esp = "#esp" + index;
-            var obs = "#obs" + index;
-            $(nom).val("");
-            $(tel).val("");
-            $(esp).val("");
-            $(obs).val("");
-        }
-    }
-    //Eliminar la cita
-    function eliminarCita(hora) {
+
+        var tel = pacientesIndex[nombreBuscado].telefono;
+        var nom = pacientesIndex[nombreBuscado].nombre;
         var fecha = $("#fecha").val();
-        var referencia = database.ref();
-        var citas = [];
-        referencia.child("Agendadas").orderByChild("fec_age").equalTo(fecha).on("value", snapshot => {
-            if (snapshot.exists()) {
-                citas = snapshot.val();
-                $.each(citas, function (id, cita) {
-                    if (cita.hor_age == hora) {
-                        var eliminar = database.ref("Agendadas");
-                        eliminar.child(id).remove();
-                    }
-                })
-            }
-        })
+        var hora = $("#hora").val();
+
+        database.ref("Agendadas")
+            .orderByChild("fec_age")
+            .equalTo(fecha)
+            .once("value", function (snapshot) {
+                var totalHora = 0;
+
+                if (snapshot.exists()) {
+                    snapshot.forEach(function (child) {
+                        var cita = child.val();
+                        if (cita.hor_age === hora && cita.est_age === "Nueva") {
+                            totalHora++;
+                        }
+                    });
+                }
+
+                if (totalHora >= 2) {
+                    alert("Esta hora ya tiene 2 citas agendadas.");
+                    return;
+                }
+
+                database.ref("Agendadas").push({
+                    nom_age: nom,
+                    tel_age: tel,
+                    obs_age: $("#observacion").val(),
+                    fec_age: fecha,
+                    hor_age: hora,
+                    est_age: "Nueva",
+                    asi_age: ""
+                }, function () {
+                    $("#datosCita").html("");
+                    $("#agendar").html("");
+                    cargarCitas();
+                });
+            });
+    }
+    //Eliminar cita
+    function eliminarCitaPorId(id) {
+        database.ref("Agendadas").child(id).remove(function () {
+            $("#datosCita").html("");
+            $("#agendar").html("");
+            cargarCitas();
+        });
     }
     //Obtiene y devuelve la fecha actual
     function fechaActual() {
