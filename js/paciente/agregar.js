@@ -35,15 +35,15 @@ $(document).ready(function () {
     function insertarPaciente(genero) {
         var referencia = database.ref("Pacientes");
         referencia.push({
-            nom_pac: $("#txtNombre").val() + " " + $("#txtApellido").val(),
-            ced_pac: $("#txtCedula").val(),
+            nom_pac: $("#txtNombre").val().trim().toUpperCase() + " " + $("#txtApellido").val().trim().toUpperCase(),
+            ced_pac: $("#txtCedula").val().trim().toUpperCase(),
             gen_pac: genero,
             fec_pac: $("#fechaNac").val(),
-            tel1_pac: $("#txtTel1").val(),
-            tel2_pac: $("#txtTel2").val(),
-            dir_pac: $("#txtDireccion").val(),
-            obs_pac: $("#txtObservaciones").val(),
-            pla_pac: $("#txtPlan").val()
+            tel1_pac: $("#txtTel1").val().trim().toUpperCase(),
+            tel2_pac: $("#txtTel2").val().trim().toUpperCase(),
+            dir_pac: $("#txtDireccion").val().trim().toUpperCase(),
+            obs_pac: $("#txtObservaciones").val().trim().toUpperCase(),
+            pla_pac: $("#txtPlan").val().trim().toUpperCase()
         })
         var alert = "<div class='alert alert-primary'>";
         alert += "<a class='close' data-dismiss='alert'> × </a> <strong> Paciente insertado con éxito! </strong>";

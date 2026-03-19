@@ -20,7 +20,7 @@ $(document).ready(function () {
     var pacientes = [];
 
     //EVENTOS CLICK
-    //Boton buscar por cedula
+    //Boton buscar por tratamiento
     $("#btnBuscar").click(function () {
         buscarPacienteTratamiento();
     });
@@ -46,6 +46,10 @@ $(document).ready(function () {
     $("#btnTodos").click(function () {
         cargarPacientes();
     })
+    //Boton buscar por cedula
+    $("#btnBuscarCedula").click(function () {
+        buscarPacienteCedula();
+    });
 
     //FOCUS
     //Dar focus al input nombre
@@ -230,7 +234,6 @@ $(document).ready(function () {
             alerta += "</div>";
             $("#alerta").html(alerta);
             $("#txtBuscarTratamiento").val("");
-            $("#txtNombre").val("");
         }
     }
 
@@ -324,8 +327,82 @@ $(document).ready(function () {
             alerta += "<a class='close' data-dismiss='alert'> × </a> <strong> Paciente no encontrado! Revise la información e inténtelo de nuevo. </strong>";
             alerta += "</div>";
             $("#alerta").html(alerta);
-            $("#txtNumeroCedula").val("");
             $("#txtNombre").val("");
+        }
+    }
+
+    //Buscar paciente por nombre
+    function buscarPacienteCedula() {
+        $("#listado").empty();
+        var ced = $("#txtCedula").val().trim();
+        var pac = pacientes.filter(p => p.cedula == ced);
+        var cadena;
+
+        pac.forEach(paciente =>{
+            cadena += "<tr>";
+            cadena += "<th>1</th>";
+            cadena += "<td>" + paciente.nombre + "</td>";
+            var edad = calcularEdad(paciente.fecha);
+            cadena += "<td>" + edad + "</td>";
+            cadena += "<td>" + paciente.telefono + "</td>";
+            cadena += "<td>" + paciente.plan + "</td>";
+            cadena += "<td>" + paciente.observacion + "</td>";
+            cadena += "<td> <button type='button' class='btnVer btn btn-outline-primary btn-sm'" + "id='" + paciente.id + "'>" +
+                "Ver </button> ";
+            /*cadena += "<button type='button' class='btnCitas btn btn-outline-dark btn-sm'" + "id='" + paciente.cedula + "*" + paciente.nombre + "*" + paciente.telefono + "'>" +
+                "Citas </button> ";*/
+            cadena += "<button type='button' class='btnCaja btn btn-outline-success btn-sm'" + "id='" + paciente.cedula + "*" + paciente.nombre + "'>" +
+                "Caja </button> ";
+            cadena += "<button type='button' class='btnOdontograma btn btn-outline-info btn-sm'" + "id='" + paciente.id + "*" + paciente.nombre + "'>" +
+                "Odo. </button> ";
+            cadena += "<button type='button' class='btnEliminar btn btn-outline-danger btn-sm'" + "id='" + paciente.id + "'>" +
+                "Eli. </button></td>";
+            cadena += "</tr>";
+            
+        });
+
+        if (pac.length > 0) {
+            $("#listado").html(cadena);
+            //Botones
+            $(".btnVer").click(function () {
+                var id = this.id;
+                localStorage.setItem("idPaciente", id);
+                location.assign("informacion.html");
+            })
+            $(".btnCitas").click(function () {
+                var datos = this.id.split("*");
+                localStorage.setItem("cedulaPaciente", datos[0]);
+                localStorage.setItem("nombrePaciente", datos[1]);
+                localStorage.setItem("telefonoPaciente", datos[2]);
+                location.assign("citas.html");
+            })
+            $(".btnCaja").click(function () {
+                var datos = this.id.split("*");
+                localStorage.setItem("cedulaPaciente", datos[0]);
+                localStorage.setItem("nombrePaciente", datos[1]);
+                location.assign("caja.html");
+            })
+            $(".btnOdontograma").click(function () {
+                var datos = this.id.split("*");
+                localStorage.setItem("idPaciente", datos[0]);
+                localStorage.setItem("nombrePaciente", datos[1]);
+                location.assign("odontograma.html");
+            });
+            $(".btnEliminar").click(function () {
+                var id = this.id;
+                if(confirm('¿Esta seguro de eliminar al paciente seleccionado') == true){
+                    eliminarPaciente(id).then(() => {
+                        pacientes = pacientes.filter(p => p.id !== id);
+                        buscarPacienteNombre();
+                    });
+                }
+            });
+        } else {
+            var alerta = "<div class='alert alert-danger'>";
+            alerta += "<a class='close' data-dismiss='alert'> × </a> <strong> Paciente no encontrado! Revise la información e inténtelo de nuevo. </strong>";
+            alerta += "</div>";
+            $("#alerta").html(alerta);
+            $("#txtCedula").val("");
         }
     }
 

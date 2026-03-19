@@ -65,7 +65,6 @@ $(document).ready(function () {
             $("#txtTipoCon").html(tipCon);
             $("#txtTipoConPil").html(tipCon);
             $("#listado").empty();
-            $("#listadoPillaro").empty();
 
             var referencia = database.ref("Facturas");
             referencia.orderByChild("fec_fac").equalTo(fec).once("value")
@@ -78,7 +77,7 @@ $(document).ready(function () {
                     var tar = 0;
                     snapshot.forEach(function(childSnapshot) {
                         var factura = childSnapshot.val();
-                        if(factura.pag_fac != "0" && factura.pag_fac != ""){
+                        if(factura.pag_fac != "0" && factura.pag_fac != "" && factura.tip_fac != ''){
                             cadena += "<tr>";
                             cadena += "<td>" + factura.fec_fac + "</td>";
                             if(factura.num_fac == "Abono"){
@@ -170,7 +169,7 @@ $(document).ready(function () {
                 var tar = 0;
                 snapshot.forEach(function(childSnapshot) {
                     var factura = childSnapshot.val();
-                    if(factura.pag_fac != "0" && factura.pag_fac != ""){
+                    if(factura.pag_fac != "0" && factura.pag_fac != "" && factura.tip_fac != ''){
                         cadena += "<tr>";
                         cadena += "<td>" + factura.fec_fac + "</td>";
                         if(factura.num_fac == "Abono"){

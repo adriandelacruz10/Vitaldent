@@ -34,6 +34,9 @@ $(document).ready(function () {
     })
     $("#btnOdontograma").click(function () {
         location.assign("odontograma.html");
+    });
+    $('#btnReiniciar').click(function () {
+        reiniciarCaja();
     })
 
     //METODOS
@@ -47,8 +50,14 @@ $(document).ready(function () {
             var deuda = 0;
             var pagado = 0;
             if (snapshot.exists()) {
-                facturas = snapshot.val();
-                $.each(facturas, function (id, factura) {
+                facturas = [];
+                $.each(snapshot.val(), function (id, factura) {
+                    factura.id = id;
+                    facturas.push(factura);
+                });
+                facturas.sort((a, b) => new Date(b.fec_fac) - new Date(a.fec_fac));
+
+                $.each(facturas, function (_, factura) {
                     cadena += "<tr>";
                     if (factura.num_fac == "") {
                         cadena += "<td>S/F</td>"
@@ -66,16 +75,16 @@ $(document).ready(function () {
                     var pag = (factura.pag_fac == "") ? 0 : factura.pag_fac;
                     cadena += "<td>" + pag + "</td>";
                     var aux = 0;
-                    if (factura.num_fac == "Abono") {
+                    if (factura.num_fac == "Abono" || factura.num_fac == "Reiniciar") {
                         cadena += "<td>0</td>"
                         cadena += "<td> <button type='button' class='btn btn-outline-primary btn-sm' disabled>" +
-                            "Ver </button> <button type='button' data-toggle='modal' data-target='#modalConfirmarA' class='btnEliminarA btn btn-outline-danger btn-sm' id='" + id + "'>" +
+                            "Ver </button> <button type='button' data-toggle='modal' data-target='#modalConfirmarA' class='btnEliminarA btn btn-outline-danger btn-sm' id='" + factura.id + "'>" +
                             "Eliminar </button> </td>";
                     } else {
                         aux = factura.tot_fac - pag;
                         cadena += "<td>" + aux + "</td>";
                         cadena += "<td> <button type='button' data-toggle='modal' data-target='#modalDetalle' class='btnVer btn btn-outline-primary btn-sm'" + "id='" + factura.cod_fac + "'>" +
-                            "Ver </button> <button type='button' data-toggle='modal' data-target='#modalConfirmar' class='btnEliminar btn btn-outline-danger btn-sm' id='" + id + "*" + factura.cod_fac + "'>" +
+                            "Ver </button> <button type='button' data-toggle='modal' data-target='#modalConfirmar' class='btnEliminar btn btn-outline-danger btn-sm' id='" + factura.id + "*" + factura.cod_fac + "'>" +
                             "Eliminar </button> </td>";
                     }
 
@@ -276,6 +285,25 @@ $(document).ready(function () {
         console.log("Detalles: " + id);
         var referencia = database.ref("Detalle_Facturas");
         referencia.child(id).remove();
+    }
+
+    //Inserta el abono 
+    function reiniciarCaja() {
+        if(confirm('¿Está seguro que desea reiniciar la caja del paciente actual?') == true){
+            var referencia = database.ref("Facturas");
+            referencia.push({
+                ced_fac: cedulaPac,
+                doc_fac: "",
+                fec_fac: fechaActual(),
+                nom_fac: nombrePac,
+                num_fac: "Reiniciar",
+                pag_fac: $('#deuda').html(),
+                tip_fac: "",
+                obs_fac: "Cuenta reiniciada",
+                tot_fac: 0,
+                id_fac: ""
+            })
+        }
     }
 
     //Obtiene y devuelve la fecha actual
